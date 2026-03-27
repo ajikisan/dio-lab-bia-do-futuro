@@ -1,0 +1,14 @@
+gradio
+langchain
+langchain-community
+sentence-transformers
+faiss-cpu
+pandas
+matplotlib
+transformers
+gtts
+huggingface-hub
+unidecode
+requests
+click
+typer
