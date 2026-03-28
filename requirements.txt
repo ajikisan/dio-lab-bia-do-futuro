@@ -9,6 +9,6 @@ transformers
 gtts
 huggingface-hub
 unidecode
-requests
+requests==2.32.4
 click
 typer
