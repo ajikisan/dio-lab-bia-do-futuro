@@ -1,91 +1,72 @@
-# 📂 FUNÇÃO PARA CARREGAR DADOS
+# 📂 data/loader.py
+import os
+import json
+import pandas as pd
+
+def ler_csv_seguro(path):
+    try:
+        # tenta padrão (vírgula)
+        df = pd.read_csv(path)
+
+        # se só tiver 1 coluna → provavelmente separador errado
+        if len(df.columns) == 1:
+            df = pd.read_csv(path, sep=";")
+
+        return df
+
+    except Exception as e:
+        print(f"❌ Erro ao ler CSV {path}: {e}")
+        return pd.DataFrame()
+
+# 🔧 Normalização de colunas
+def normalizar_colunas(df):
+    df.columns = (
+        df.columns
+        .str.lower()
+        .str.strip()
+        .str.replace(" ", "_")
+    )
+    return df
+
+# 📂 FUNÇÃO PRINCIPAL PARA CARREGAR DADOS
 def carregar_dados():
     try:
         print("📂 Carregando arquivos do ambiente...")
 
-        base_path = os.path.dirname(__file__)
+        base_path = os.path.dirname(os.path.abspath(__file__))
 
-        # =========================
-        # 📊 CARREGAMENTO DOS CSVs
-        # =========================
-        try:
-            transacoes = pd.read_csv(
-                os.path.join(base_path, "transacoes.csv"),
-                encoding="utf-8"
-            )
-        except UnicodeDecodeError:
-            transacoes = pd.read_csv(
-                os.path.join(base_path, "transacoes.csv"),
-                encoding="latin-1"
-            )
+        # ------------------------
+        # TRANSAÇÕES
+        # ------------------------
+        path_t = os.path.join(base_path, "transacoes.csv")
+        transacoes = ler_csv_seguro(path_t)
+        transacoes = normalizar_colunas(transacoes)
 
-        try:
-            historico = pd.read_csv(
-                os.path.join(base_path, "historico_atendimento.csv"),
-                encoding="utf-8"
-            )
-        except UnicodeDecodeError:
-            historico = pd.read_csv(
-                os.path.join(base_path, "historico_atendimento.csv"),
-                encoding="latin-1"
-            )
+        print("🧾 Colunas transações:", list(transacoes.columns))
 
-        # =========================
-        # 🔧 NORMALIZA COLUNAS
-        # =========================
-        transacoes.columns = transacoes.columns.str.lower().str.strip()
-        historico.columns = historico.columns.str.lower().str.strip()
+        # ------------------------
+        # HISTÓRICO
+        # ------------------------
+        path_h = os.path.join(base_path, "historico_atendimento.csv")
+        historico = ler_csv_seguro(path_h)
+        historico = normalizar_colunas(historico)
 
-        print("📊 Colunas transações:", list(transacoes.columns))
         print("📞 Colunas histórico:", list(historico.columns))
 
-        # =========================
-        # 🔍 VALIDAÇÃO DE COLUNAS
-        # =========================
-        colunas_transacoes = {"categoria", "tipo", "valor"}
-        colunas_historico = {"canal"}
-
-        if not colunas_transacoes.issubset(transacoes.columns):
-            faltantes = colunas_transacoes - set(transacoes.columns)
-            raise KeyError(f"❌ Transações sem colunas obrigatórias: {faltantes}")
-
-        if not colunas_historico.issubset(historico.columns):
-            faltantes = colunas_historico - set(historico.columns)
-            raise KeyError(f"❌ Histórico sem colunas obrigatórias: {faltantes}")
-
-        # =========================
-        # 🔢 GARANTE TIPO NUMÉRICO
-        # =========================
-        transacoes["valor"] = pd.to_numeric(transacoes["valor"], errors="coerce")
-
-        if transacoes["valor"].isna().any():
-            print("⚠️ Atenção: existem valores inválidos na coluna 'valor' (convertidos para NaN)")
-
-        # =========================
-        # 📄 JSON
-        # =========================
-        with open(
-            os.path.join(base_path, "produtos_financeiros.json"),
-            encoding="utf-8"
-        ) as f:
+        # ------------------------
+        # JSONs
+        # ------------------------
+        with open(os.path.join(base_path, "produtos_financeiros.json"), encoding="utf-8") as f:
             produtos = json.load(f)
 
-        with open(
-            os.path.join(base_path, "perfil_investidor.json"),
-            encoding="utf-8"
-        ) as f:
+        with open(os.path.join(base_path, "perfil_investidor.json"), encoding="utf-8") as f:
             perfil = json.load(f)
 
-        print("✅ Dados carregados com sucesso!")
+        print("✅ Dados carregados com sucesso!\n")
+
         return transacoes, historico, produtos, perfil
 
     except Exception as e:
-        print("❌ Erro ao carregar dados:", e)
-
-        # fallback seguro (não quebra o app)
-        return (
-            pd.DataFrame(),
-            pd.DataFrame(),
-            {},
-            {}
-        )
+        print("❌ ERRO:", e)
+        return pd.DataFrame(), pd.DataFrame(), [], {}
+       
