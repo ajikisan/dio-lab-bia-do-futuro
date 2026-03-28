@@ -1,149 +1,169 @@
 <<<<<<< HEAD
-# 🐾 Capivara Financeira
+<p align="center">
+  <img src="assets/capivara_webp.webp" width="300"/>
+</p>
 
-### Assistente Inteligente com IA, RAG e Análise Financeira
+<h1 align="center">🏰 Capivara Financeira</h1>
+<p align="center">IA no Reino das Moedas</p>
 
-Projeto desenvolvido como parte do bootcamp da DIO com foco na construção de uma assistente inteligente para finanças pessoais, combinando:
-
-* 🤖 Inteligência Artificial (LLMs)
-* 🧠 RAG (Retrieval Augmented Generation)
-* 📊 Análise de dados financeiros
-* 🎨 Interface interativa com Gradio
+Uma assistente financeira inteligente com narrativa lúdica, que combina **Regras + RAG + IA generativa** para analisar dados, responder perguntas e gerar insights sobre a vida financeira do usuário.
 
 ---
 
-## 🏰 Sobre o Projeto
+## 🎯 Objetivo
 
-A **Capivara Financeira** é uma assistente que atua como uma guardiã do "Reino das Moedas", ajudando o usuário a entender sua vida financeira de forma:
+Criar uma experiência interativa que:
 
-* Clara
-* Interativa
-* Lúdica (com narrativa medieval)
-
-Ela analisa dados reais, responde perguntas, gera gráficos e até fala com o usuário 🎧
-
----
-
-## 🚀 Funcionalidades
-
-✅ Análise de transações financeiras
-✅ Identificação de maior/menor gasto
-✅ Cálculo de entradas, saídas e saldo
-✅ Perfil do investidor
-✅ Sugestão de produtos financeiros
-✅ Sistema de intenção com regex
-✅ RAG (busca semântica com FAISS)
-✅ Integração com IA (Hugging Face)
-✅ Geração de respostas em linguagem natural
-✅ Narrativa gamificada (tema medieval)
-✅ Geração de áudio (Text-to-Speech)
-✅ Interface web interativa (Gradio)
-✅ Visualização de dados (gráficos)
+* 📊 Analisa transações financeiras
+* 🧠 Utiliza busca semântica (RAG)
+* 🤖 Gera respostas com IA
+* 🎭 Apresenta resultados com narrativa gamificada
+* 🔊 Converte respostas em áudio
+* 📈 Exibe gráficos interativos
 
 ---
 
-## 🧩 Arquitetura do Projeto
+## 🧠 Arquitetura do Projeto
+
+O sistema segue uma arquitetura modular baseada em camadas:
 
 ```bash
 capivara-financeira/
 │
-├── core/
-│   ├── intencoes.py        # 🔎 interpretação de perguntas
-│   ├── regras.py           # 📊 lógica financeira
-│   ├── rag.py              # 🧠 busca semântica (FAISS)
-│   ├── ia.py               # 🤖 geração de respostas
-│   ├── audio.py            # 🔊 geração de áudio
+├── app.py                  # Interface com Gradio
+├── main.py                 # Orquestrador principal
 │
-├── data/
-│   ├── loader.py           # 📂 carregamento de dados
+├── core/                   # Lógica de negócio
+│   ├── intencoes.py        # Detecção de intenção (regex)
+│   ├── regras.py           # Regras e análises financeiras
+│   ├── rag.py              # RAG (FAISS + embeddings)
+│   ├── ia.py               # Integração com IA (local + API)
+│   ├── audio.py            # Geração de áudio (gTTS)
+│
+├── data/                   # Dados
+│   ├── loader.py
 │   ├── transacoes.csv
 │   ├── historico_atendimento.csv
 │   ├── produtos_financeiros.json
 │   ├── perfil_investidor.json
 │
 ├── ui/
-│   ├── graficos.py         # 📊 gráficos + narrativa
+│   ├── graficos.py         # Gráficos + narrativas
 │
 ├── utils/
-│   ├── normalizacao.py     # 🔤 normalização de texto
-│   ├── constantes.py       # 🧠 termos e regras
+│   ├── normalizacao.py
+│   ├── constantes.py
 │
 ├── assets/
-│   ├── capivara_webp.webp  # 🖼️ imagem da interface
+│   └── capivara_webp.webp
 │
-├── app.py                  # 🌐 interface Gradio
-├── main.py                 # 🧠 orquestrador principal
-├── requirements.txt        # 📦 dependências
+└── requirements.txt
 ```
 
 ---
 
-## ⚙️ Tecnologias Utilizadas
+## ⚙️ Como funciona (Fluxo)
+
+A resposta do sistema segue 3 camadas:
+
+1. ⚡ **Regras (rápido)**
+
+   * Regex + lógica determinística
+
+2. 🔎 **RAG (contexto)**
+
+   * Busca semântica com FAISS
+   * Base: transações, histórico, produtos, perfil
+
+3. 🤖 **IA (fallback)**
+
+   * HuggingFace API ou modelo local
+   * Geração de resposta natural
+
+---
+
+## 🧩 Tecnologias utilizadas
 
 * Python
+* Pandas
+* Matplotlib
 * Gradio
 * LangChain
 * FAISS
-* Hugging Face Transformers
 * Sentence Transformers
-* Pandas
-* Matplotlib
+* Transformers (HuggingFace)
 * gTTS (Text-to-Speech)
 
 ---
 
-## ▶️ Como Executar Localmente
+## 🚀 Como executar (Local)
+
+### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/ajikisan/dio-lab-bia-do-futuro
+git clone https://github.com/ajikisan/dio-lab-bia-do-futuro.git
 cd dio-lab-bia-do-futuro
+```
 
+### 2. Instale as dependências
+
+```bash
 pip install -r requirements.txt
+```
+
+### 3. Execute a aplicação
+
+```bash
 python app.py
 ```
 
 ---
 
-## ☁️ Como Executar no Google Colab
+## ☁️ Executar no Google Colab
+
+1. Faça upload do projeto (zip ou GitHub)
+2. Instale dependências:
 
 ```python
-!git clone https://github.com/ajikisan/dio-lab-bia-do-futuro.git
-%cd dio-lab-bia-do-futuro
-
 !pip install -r requirements.txt
+```
 
+3. Execute:
+
+```python
 !python app.py
 ```
 
 ---
 
-## 💬 Exemplos de Perguntas
+## 💡 Diferenciais do Projeto
 
-* "Qual meu maior gasto?"
-* "Como está minha situação financeira?"
-* "Quanto eu ganhei?"
-* "Quais são meus investimentos?"
-* "Me dê uma recomendação financeira"
-
----
-
-## 🔒 Segurança
-
-O sistema possui proteção contra acesso a dados sensíveis como:
-
-* CPF
-* Senhas
-* Dados bancários
+✔️ Arquitetura modular profissional
+✔️ IA híbrida (Regras + RAG + Generativa)
+✔️ Busca semântica com FAISS
+✔️ Interface interativa com Gradio
+✔️ Narrativa gamificada (UX diferenciada)
+✔️ Geração de áudio (TTS)
+✔️ Visualização de dados
 
 ---
 
-## 🧠 Diferenciais
+## 🎭 Experiência do Usuário
 
-✨ Arquitetura modular (nível produção)
-✨ Integração de múltiplas camadas de IA
-✨ Uso de RAG para enriquecer respostas
-✨ Experiência gamificada (narrativa medieval)
-✨ Interface interativa com gráficos + áudio
+O sistema transforma finanças em uma jornada:
+
+* 💰 Entradas → “rios de moedas”
+* 🐉 Saídas → “tributos aos dragões”
+* 🛡️ Reserva → “baú encantado”
+* 🎯 Metas → “profecias do oráculo”
+
+---
+
+## 🔒 Considerações
+
+* O sistema não acessa dados reais sensíveis
+* Respeita boas práticas de segurança
+* Utiliza dados simulados para demonstração
 
 ---
 
@@ -151,185 +171,19 @@ O sistema possui proteção contra acesso a dados sensíveis como:
 
 **Mirian Ajiki Molicawa**
 
-🔗 LinkedIn:
-https://www.linkedin.com/in/mirian-ajiki-molicawa/
-
-💻 GitHub:
-https://github.com/ajikisan
+* 💼 LinkedIn: https://www.linkedin.com/in/mirian-ajiki-molicawa/
+* 💻 GitHub: https://github.com/ajikisan
 
 ---
 
 ## 📌 Status do Projeto
 
-🚧 Em evolução
-
-Melhorias futuras:
-
-* Memória de conversa
-* Deploy online
-* Interface aprimorada
-* Novos tipos de análise financeira
+🚧 Em evolução — melhorias contínuas em IA, UX e performance.
 
 ---
 
 ## ⭐ Contribuição
 
-Sinta-se à vontade para contribuir ou sugerir melhorias!
+Sinta-se à vontade para abrir issues ou contribuir com melhorias!
 
 ---
-
-## 🐾 Licença
-
-Este projeto foi desenvolvido para fins educacionais.
-Março/2026
-=======
-# 🤖 Agente Financeiro Inteligente com IA Generativa
-
-## Contexto
-
-Os assistentes virtuais no setor financeiro estão evoluindo de simples chatbots reativos para **agentes inteligentes e proativos**. Neste desafio, você vai idealizar e prototipar um agente financeiro que utiliza IA Generativa para:
-
-- **Antecipar necessidades** ao invés de apenas responder perguntas
-- **Personalizar** sugestões com base no contexto de cada cliente
-- **Cocriar soluções** financeiras de forma consultiva
-- **Garantir segurança** e confiabilidade nas respostas (anti-alucinação)
-
-> [!TIP]
-> Na pasta [`examples/`](./examples/) você encontra referências de implementação para cada etapa deste desafio.
-
----
-
-## O Que Você Deve Entregar
-
-### 1. Documentação do Agente
-
-Defina **o que** seu agente faz e **como** ele funciona:
-
-- **Caso de Uso:** Qual problema financeiro ele resolve? (ex: consultoria de investimentos, planejamento de metas, alertas de gastos)
-- **Persona e Tom de Voz:** Como o agente se comporta e se comunica?
-- **Arquitetura:** Fluxo de dados e integração com a base de conhecimento
-- **Segurança:** Como evitar alucinações e garantir respostas confiáveis?
-
-📄 **Template:** [`docs/01-documentacao-agente.md`](./docs/01-documentacao-agente.md)
-
----
-
-### 2. Base de Conhecimento
-
-Utilize os **dados mockados** disponíveis na pasta [`data/`](./data/) para alimentar seu agente:
-
-| Arquivo | Formato | Descrição |
-|---------|---------|-----------|
-| `transacoes.csv` | CSV | Histórico de transações do cliente |
-| `historico_atendimento.csv` | CSV | Histórico de atendimentos anteriores |
-| `perfil_investidor.json` | JSON | Perfil e preferências do cliente |
-| `produtos_financeiros.json` | JSON | Produtos e serviços disponíveis |
-
-Você pode adaptar ou expandir esses dados conforme seu caso de uso.
-
-📄 **Template:** [`docs/02-base-conhecimento.md`](./docs/02-base-conhecimento.md)
-
----
-
-### 3. Prompts do Agente
-
-Documente os prompts que definem o comportamento do seu agente:
-
-- **System Prompt:** Instruções gerais de comportamento e restrições
-- **Exemplos de Interação:** Cenários de uso com entrada e saída esperada
-- **Tratamento de Edge Cases:** Como o agente lida com situações limite
-
-📄 **Template:** [`docs/03-prompts.md`](./docs/03-prompts.md)
-
----
-
-### 4. Aplicação Funcional
-
-Desenvolva um **protótipo funcional** do seu agente:
-
-- Chatbot interativo (sugestão: Streamlit, Gradio ou similar)
-- Integração com LLM (via API ou modelo local)
-- Conexão com a base de conhecimento
-
-📁 **Pasta:** [`src/`](./src/)
-
----
-
-### 5. Avaliação e Métricas
-
-Descreva como você avalia a qualidade do seu agente:
-
-**Métricas Sugeridas:**
-- Precisão/assertividade das respostas
-- Taxa de respostas seguras (sem alucinações)
-- Coerência com o perfil do cliente
-
-📄 **Template:** [`docs/04-metricas.md`](./docs/04-metricas.md)
-
----
-
-### 6. Pitch
-
-Grave um **pitch de 3 minutos** (estilo elevador) apresentando:
-
-- Qual problema seu agente resolve?
-- Como ele funciona na prática?
-- Por que essa solução é inovadora?
-
-📄 **Template:** [`docs/05-pitch.md`](./docs/05-pitch.md)
-
----
-
-## Ferramentas Sugeridas
-
-Todas as ferramentas abaixo possuem versões gratuitas:
-
-| Categoria | Ferramentas |
-|-----------|-------------|
-| **LLMs** | [ChatGPT](https://chat.openai.com/), [Copilot](https://copilot.microsoft.com/), [Gemini](https://gemini.google.com/), [Claude](https://claude.ai/), [Ollama](https://ollama.ai/) |
-| **Desenvolvimento** | [Streamlit](https://streamlit.io/), [Gradio](https://www.gradio.app/), [Google Colab](https://colab.research.google.com/) |
-| **Orquestração** | [LangChain](https://www.langchain.com/), [LangFlow](https://www.langflow.org/), [CrewAI](https://www.crewai.com/) |
-| **Diagramas** | [Mermaid](https://mermaid.js.org/), [Draw.io](https://app.diagrams.net/), [Excalidraw](https://excalidraw.com/) |
-
----
-
-## Estrutura do Repositório
-
-```
-📁 lab-agente-financeiro/
-│
-├── 📄 README.md
-│
-├── 📁 data/                          # Dados mockados para o agente
-│   ├── historico_atendimento.csv     # Histórico de atendimentos (CSV)
-│   ├── perfil_investidor.json        # Perfil do cliente (JSON)
-│   ├── produtos_financeiros.json     # Produtos disponíveis (JSON)
-│   └── transacoes.csv                # Histórico de transações (CSV)
-│
-├── 📁 docs/                          # Documentação do projeto
-│   ├── 01-documentacao-agente.md     # Caso de uso e arquitetura
-│   ├── 02-base-conhecimento.md       # Estratégia de dados
-│   ├── 03-prompts.md                 # Engenharia de prompts
-│   ├── 04-metricas.md                # Avaliação e métricas
-│   └── 05-pitch.md                   # Roteiro do pitch
-│
-├── 📁 src/                           # Código da aplicação
-│   └── app.py                        # (exemplo de estrutura)
-│
-├── 📁 assets/                        # Imagens e diagramas
-│   └── ...
-│
-└── 📁 examples/                      # Referências e exemplos
-    └── README.md
-```
-
----
-
-## Dicas Finais
-
-1. **Comece pelo prompt:** Um bom system prompt é a base de um agente eficaz
-2. **Use os dados mockados:** Eles garantem consistência e evitam problemas com dados sensíveis
-3. **Foque na segurança:** No setor financeiro, evitar alucinações é crítico
-4. **Teste cenários reais:** Simule perguntas que um cliente faria de verdade
-5. **Seja direto no pitch:** 3 minutos passam rápido, vá ao ponto
->>>>>>> 3ef24898e91f2e518ee9d85e50f798ace5b7e3b9

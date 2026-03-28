@@ -1,4 +1,17 @@
+# Python
 __pycache__/
 *.pyc
+*.pyo
+
+# Ambiente
 .env
+
+# Áudio gerado
 *.mp3
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
