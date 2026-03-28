@@ -1,8 +1,32 @@
 # 📂 data/loader.py 
-
 import os
 import json
 import pandas as pd
+
+
+# 🔧 Remove lixo de merge / erros comuns
+def _limpar_linhas_invalidas(df):
+    if df is None or df.empty:
+        return df
+    
+    # Remove linhas totalmente vazias   
+    df = df.dropna(how="all")
+
+    erros_excel = ["#NOME?", "#VALOR!", "#REF!", "#DIV/0!", "Erro:510"]
+
+    # Converte tudo para string uma vez
+    df = df.astype(str)
+
+    # Remove linhas com erros de Excel
+    for erro in erros_excel:
+        df = df[~df.apply(lambda row: row.str.contains(erro, na=False)).any(axis=1)]
+
+    # Remove conflitos de merge (Git)
+    df = df[~df.apply(
+        lambda row: row.str.contains("<<<<<<<|=======|>>>>>>>", na=False)
+    ).any(axis=1)]
+
+    return df
 
 
 # 🔧 Normaliza nomes de colunas
@@ -21,19 +45,20 @@ def _corrigir_tipos(transacoes, historico):
     # --- TRANSACOES ---
     if transacoes is not None and not transacoes.empty:
 
-        # valor → float
         if "valor" in transacoes.columns:
-            try:
-                transacoes["valor"] = (
-                    transacoes["valor"]
-                    .astype(str)
-                    .str.replace(",", ".", regex=False)
-                    .astype(float)
-                )
-            except Exception as e:
-                print("⚠️ Erro ao converter 'valor':", e)
+            # Remove caracteres inválidos e corrige separador
+            transacoes["valor"] = (
+                transacoes["valor"]
+                .astype(str)
+                .str.replace(",", ".", regex=False)
+                .str.replace(r"[^0-9\.\-]", "", regex=True)
+            )
 
-        # tipo → string padronizada
+            transacoes["valor"] = pd.to_numeric(
+                transacoes["valor"],
+                errors="coerce"
+            )
+
         if "tipo" in transacoes.columns:
             transacoes["tipo"] = (
                 transacoes["tipo"]
@@ -42,7 +67,6 @@ def _corrigir_tipos(transacoes, historico):
                 .str.strip()
             )
 
-        # categoria → string padronizada
         if "categoria" in transacoes.columns:
             transacoes["categoria"] = (
                 transacoes["categoria"]
@@ -50,6 +74,10 @@ def _corrigir_tipos(transacoes, historico):
                 .str.lower()
                 .str.strip()
             )
+
+        # Remove linhas onde valor ficou inválido
+        if "valor" in transacoes.columns:
+            transacoes = transacoes.dropna(subset=["valor"])
 
     # --- HISTORICO ---
     if historico is not None and not historico.empty:
@@ -98,13 +126,26 @@ def carregar_dados():
         base_path = os.path.dirname(__file__)
 
         # =============================
-        # 📊 CSVs
+        # 📊 CSVs (robusto contra erro)
         # =============================
         transacoes_path = os.path.join(base_path, "transacoes.csv")
         historico_path = os.path.join(base_path, "historico_atendimento.csv")
 
-        transacoes = pd.read_csv(transacoes_path, encoding="utf-8")
-        historico = pd.read_csv(historico_path, encoding="utf-8")
+        transacoes = pd.read_csv(
+            transacoes_path,
+            encoding="utf-8",
+            on_bad_lines="skip"  # 🔥 ignora linhas quebradas
+        )
+
+        historico = pd.read_csv(
+            historico_path,
+            encoding="utf-8",
+            on_bad_lines="skip"
+        )
+
+        # Limpeza pesada
+        transacoes = _limpar_linhas_invalidas(transacoes)
+        historico = _limpar_linhas_invalidas(historico)
 
         # Normaliza colunas
         transacoes = _normalizar_colunas(transacoes)
@@ -133,7 +174,7 @@ def carregar_dados():
             print("✅ Dados carregados e validados com sucesso!")
 
         # =============================
-        # 🔎 DEBUG (ajuda MUITO no Colab)
+        # 🔎 DEBUG
         # =============================
         print("\n🔍 DEBUG TRANSACOES")
         print(transacoes.head())
@@ -157,7 +198,7 @@ def carregar_dados():
     except Exception as e:
         print("❌ Erro inesperado:", e)
 
-    # 🛟 fallback seguro (NUNCA quebra o app)
+    # 🛟 fallback seguro
     return (
         pd.DataFrame(),
         pd.DataFrame(),

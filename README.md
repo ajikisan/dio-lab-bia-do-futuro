@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <p align="center">
   <img src="assets/capivara_webp.webp" width="300"/>
 </p>
