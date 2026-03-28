@@ -1,72 +1,166 @@
-# 📂 data/loader.py
+# 📂 data/loader.py 
+
 import os
 import json
 import pandas as pd
 
-def ler_csv_seguro(path):
-    try:
-        # tenta padrão (vírgula)
-        df = pd.read_csv(path)
 
-        # se só tiver 1 coluna → provavelmente separador errado
-        if len(df.columns) == 1:
-            df = pd.read_csv(path, sep=";")
-
-        return df
-
-    except Exception as e:
-        print(f"❌ Erro ao ler CSV {path}: {e}")
-        return pd.DataFrame()
-
-# 🔧 Normalização de colunas
-def normalizar_colunas(df):
+# 🔧 Normaliza nomes de colunas
+def _normalizar_colunas(df):
     df.columns = (
         df.columns
         .str.lower()
         .str.strip()
-        .str.replace(" ", "_")
     )
     return df
 
-# 📂 FUNÇÃO PRINCIPAL PARA CARREGAR DADOS
+
+# 🔧 Corrige tipos de dados
+def _corrigir_tipos(transacoes, historico):
+
+    # --- TRANSACOES ---
+    if transacoes is not None and not transacoes.empty:
+
+        # valor → float
+        if "valor" in transacoes.columns:
+            try:
+                transacoes["valor"] = (
+                    transacoes["valor"]
+                    .astype(str)
+                    .str.replace(",", ".", regex=False)
+                    .astype(float)
+                )
+            except Exception as e:
+                print("⚠️ Erro ao converter 'valor':", e)
+
+        # tipo → string padronizada
+        if "tipo" in transacoes.columns:
+            transacoes["tipo"] = (
+                transacoes["tipo"]
+                .astype(str)
+                .str.lower()
+                .str.strip()
+            )
+
+        # categoria → string padronizada
+        if "categoria" in transacoes.columns:
+            transacoes["categoria"] = (
+                transacoes["categoria"]
+                .astype(str)
+                .str.lower()
+                .str.strip()
+            )
+
+    # --- HISTORICO ---
+    if historico is not None and not historico.empty:
+
+        if "canal" in historico.columns:
+            historico["canal"] = (
+                historico["canal"]
+                .astype(str)
+                .str.lower()
+                .str.strip()
+            )
+
+    return transacoes, historico
+
+
+# 🔍 Valida estrutura mínima
+def _validar_dados(transacoes, historico):
+
+    erros = []
+
+    if transacoes is None or transacoes.empty:
+        erros.append("❌ Transações vazias")
+
+    else:
+        colunas_necessarias = {"categoria", "tipo", "valor"}
+        faltantes = colunas_necessarias - set(transacoes.columns)
+
+        if faltantes:
+            erros.append(f"❌ Transações sem colunas: {faltantes}")
+
+    if historico is None or historico.empty:
+        erros.append("❌ Histórico vazio")
+
+    else:
+        if "canal" not in historico.columns:
+            erros.append("❌ Histórico sem coluna 'canal'")
+
+    return erros
+
+
+# 🚀 FUNÇÃO PRINCIPAL
 def carregar_dados():
     try:
         print("📂 Carregando arquivos do ambiente...")
 
-        base_path = os.path.dirname(os.path.abspath(__file__))
+        base_path = os.path.dirname(__file__)
 
-        # ------------------------
-        # TRANSAÇÕES
-        # ------------------------
-        path_t = os.path.join(base_path, "transacoes.csv")
-        transacoes = ler_csv_seguro(path_t)
-        transacoes = normalizar_colunas(transacoes)
+        # =============================
+        # 📊 CSVs
+        # =============================
+        transacoes_path = os.path.join(base_path, "transacoes.csv")
+        historico_path = os.path.join(base_path, "historico_atendimento.csv")
 
-        print("🧾 Colunas transações:", list(transacoes.columns))
+        transacoes = pd.read_csv(transacoes_path, encoding="utf-8")
+        historico = pd.read_csv(historico_path, encoding="utf-8")
 
-        # ------------------------
-        # HISTÓRICO
-        # ------------------------
-        path_h = os.path.join(base_path, "historico_atendimento.csv")
-        historico = ler_csv_seguro(path_h)
-        historico = normalizar_colunas(historico)
+        # Normaliza colunas
+        transacoes = _normalizar_colunas(transacoes)
+        historico = _normalizar_colunas(historico)
 
-        print("📞 Colunas histórico:", list(historico.columns))
+        # Corrige tipos
+        transacoes, historico = _corrigir_tipos(transacoes, historico)
 
-        # ------------------------
-        # JSONs
-        # ------------------------
+        # =============================
+        # 📄 JSON
+        # =============================
         with open(os.path.join(base_path, "produtos_financeiros.json"), encoding="utf-8") as f:
             produtos = json.load(f)
 
         with open(os.path.join(base_path, "perfil_investidor.json"), encoding="utf-8") as f:
             perfil = json.load(f)
 
-        print("✅ Dados carregados com sucesso!\n")
+        # =============================
+        # 🔍 Validação
+        # =============================
+        erros = _validar_dados(transacoes, historico)
+
+        if erros:
+            print("\n".join(erros))
+        else:
+            print("✅ Dados carregados e validados com sucesso!")
+
+        # =============================
+        # 🔎 DEBUG (ajuda MUITO no Colab)
+        # =============================
+        print("\n🔍 DEBUG TRANSACOES")
+        print(transacoes.head())
+        print(transacoes.dtypes)
+
+        print("\n🔍 DEBUG HISTORICO")
+        print(historico.head())
+        print(historico.dtypes)
 
         return transacoes, historico, produtos, perfil
 
+    except FileNotFoundError as e:
+        print("❌ Arquivo não encontrado:", e)
+
+    except pd.errors.EmptyDataError:
+        print("❌ CSV vazio ou corrompido")
+
+    except json.JSONDecodeError:
+        print("❌ Erro ao ler JSON")
+
     except Exception as e:
-        print("❌ ERRO:", e)
-        return pd.DataFrame(), pd.DataFrame(), [], {}
-       
+        print("❌ Erro inesperado:", e)
+
+    # 🛟 fallback seguro (NUNCA quebra o app)
+    return (
+        pd.DataFrame(),
+        pd.DataFrame(),
+        {},
+        {}
+    )
