@@ -1,25 +1,23 @@
 # 🌐 app.py — Interface Gradio
-
 import gradio as gr
 
-# 🔁 importa o orquestrador
 from main import responder
 
-# 📊 gráficos + placeholder
 from ui.graficos import (
     grafico_atendimento_com_historia,
     grafico_transacoes_com_historia,
     capivara_placeholder
 )
 
-# 📂 dados globais
-from data.loader import carregar_dados
+from data.loader import carregar_dados, carregar_vector_db
 
+# 📂 Carrega dados
 transacoes, historico, produtos, perfil = carregar_dados()
 
+# 🧠 Carrega RAG corretamente
+vector_db = carregar_vector_db()
 
-
-# 🏰 Mensagem inicial
+#🏰 Mensagem inicial
 mensagem_inicial = """
 🏰 Bem-vindo ao Reino das Moedas!
 Eu sou a Capivara Financeira, guardiã divertida que transforma o dinheiro em aventuras mágicas.
@@ -27,17 +25,30 @@ Eu sou a Capivara Financeira, guardiã divertida que transforma o dinheiro em av
 Sempre ao seu lado, sem substituir o valor das conversas humanas.
 """
 
-
-# 🔧 Wrappers (IMPORTANTE)
+# 🔧 Wrappers gráficos
 def grafico_atendimento_ui():
     fig, narrativa, audio, _ = grafico_atendimento_com_historia(historico)
     return fig, narrativa, audio
-
 
 def grafico_transacoes_ui():
     fig, narrativa, audio, _ = grafico_transacoes_com_historia(transacoes)
     return fig, narrativa, audio
 
+# 🎯 Wrapper do responder COM RAG
+def responder_ui(msg, chat):
+    from core.rag import buscar_contexto
+
+    buscar_contexto_func = lambda q: buscar_contexto(q, vector_db)
+
+    return responder(
+        msg,
+        chat,
+        transacoes=transacoes,
+        historico=historico,
+        produtos=produtos,
+        perfil=perfil,
+        buscar_contexto_func=buscar_contexto_func
+    )
 
 # 🎨 Interface
 with gr.Blocks() as app:
@@ -46,7 +57,6 @@ with gr.Blocks() as app:
 
     with gr.Row():
 
-        # 💬 CHAT
         with gr.Column(scale=2):
 
             chatbot = gr.Chatbot(
@@ -55,10 +65,7 @@ with gr.Blocks() as app:
                 height=400
             )
 
-            msg = gr.Textbox(
-                placeholder="Pergunte sobre suas moedas...",
-                lines=1
-            )
+            msg = gr.Textbox(placeholder="Pergunte algo...")
 
             with gr.Row():
                 enviar = gr.Button("Enviar")
@@ -67,20 +74,18 @@ with gr.Blocks() as app:
             audio_output = gr.Audio(label="Áudio", autoplay=True)
             grafico_output = gr.Plot(value=capivara_placeholder())
 
-            # 🚀 envio
             enviar.click(
-                responder,
+                responder_ui,
                 [msg, chatbot],
                 [msg, chatbot, grafico_output, audio_output]
             )
 
             msg.submit(
-                responder,
+                responder_ui,
                 [msg, chatbot],
                 [msg, chatbot, grafico_output, audio_output]
             )
 
-            # 🧹 limpar
             def limpar_chat():
                 return "", [{"role": "assistant", "content": mensagem_inicial}], capivara_placeholder(), None
 
@@ -90,13 +95,12 @@ with gr.Blocks() as app:
                 [msg, chatbot, grafico_output, audio_output]
             )
 
-        # 📊 VISUAL
         with gr.Column(scale=1):
 
-            gr.Markdown("## 📊 Visualizações")
+            gr.Markdown("## 📊 Gráficos")
 
-            btn_atendimento = gr.Button("Gráfico de Atendimento")
-            btn_transacoes = gr.Button("Gráfico de Transações")
+            btn_atendimento = gr.Button("Atendimento")
+            btn_transacoes = gr.Button("Transações")
 
             narrativa_output = gr.Textbox(lines=8)
 
@@ -112,7 +116,5 @@ with gr.Blocks() as app:
                 [grafico_output, narrativa_output, audio_output]
             )
 
-
-# 🚀 rodar
 if __name__ == "__main__":
     app.launch(share=True)
