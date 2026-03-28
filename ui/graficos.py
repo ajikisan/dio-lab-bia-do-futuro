@@ -14,6 +14,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # --- Placeholder gráfico ---
 def capivara_placeholder():
     fig, ax = plt.subplots(figsize=(4, 4))
+    plt.close(fig)
     ax.axis("off")
 
     try:
@@ -41,6 +42,7 @@ def capivara_placeholder():
 # --- Gráfico de Atendimento ---
 def grafico_atendimento(historico):
     fig, ax = plt.subplots(figsize=(4, 4))
+    plt.close(fig)
 
     try:
         if historico is None or historico.empty:
@@ -71,6 +73,7 @@ def grafico_atendimento(historico):
 # --- Gráfico de Transações ---
 def grafico_transacoes(transacoes):
     fig, ax = plt.subplots(figsize=(7, 5))
+    plt.close(fig)
 
     try:
         if transacoes is None or transacoes.empty:
