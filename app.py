@@ -13,7 +13,10 @@ from ui.graficos import (
 )
 
 # 📂 dados globais
-from data.loader import transacoes, historico
+from data.loader import carregar_dados
+
+transacoes, historico, produtos, perfil = carregar_dados()
+
 
 
 # 🏰 Mensagem inicial
