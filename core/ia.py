@@ -1,12 +1,11 @@
 # 🤖 IA — Geração de respostas
 
 import os
-import re
 import requests
 from transformers import pipeline
 
 
-# 🚀 1 — Modelo local (fallback sempre disponível)
+# 🚀 Modelo local
 try:
     gerador_local = pipeline(
         "text-generation",
@@ -17,7 +16,7 @@ except Exception as e:
     gerador_local = None
 
 
-# 🎭 2 — Personalidade da IA
+# 🎭 SYSTEM PROMPT - Personalidade da Inteligência Artificial
 SYSTEM_PROMPT = """
 Você é a Capivara Financeira, guardiã do Reino das Moedas.
 
@@ -46,9 +45,8 @@ saldo = tesouro do reino
 """
 
 
-# 🌐 3 — API HuggingFace (opcional)
+# 🌐 API HuggingFace (opcional)
 HF_TOKEN = os.environ.get("HF_TOKEN")
-
 API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-base"
 
 headers = {
@@ -57,7 +55,6 @@ headers = {
 
 
 def gerar_resposta_ia(pergunta, contexto=""):
-    """Chamada à API externa (opcional)"""
     if not HF_TOKEN:
         return None
 
@@ -70,6 +67,8 @@ Contexto:
 
 Pergunta:
 {pergunta}
+
+Resposta:
 """
 
         response = requests.post(
@@ -94,42 +93,46 @@ Pergunta:
         return None
 
 
-# 🧠 4 — Função principal de geração
+# 🧠 Função principal - Pipeline de Respostas
 def gerar_resposta(
     pergunta,
-    dados,
-    executar_func,
-    buscar_contexto_func,
+    dados=None,
+    executar_func=None,
+    buscar_contexto_func=None,
     vector_db=None,
     usar_token=False
 ):
-    """
-    Pipeline de resposta:
-    1. Regras (rápido e determinístico)
-    2. RAG (contexto semântico)
-    3. IA externa (opcional)
-    4. Modelo local (fallback)
-    """
+
+    dados = dados or {}
 
     try:
-        # 🔎 1 — Regras
-        resposta = executar_func(pergunta, dados)
+        # =============================
+        # 🔎 1 Regras Determinísticas
+        # =============================
+        if executar_func:
+            resp = executar_func(pergunta, dados)
+            if resp and "não reconhecida" not in str(resp).lower():
+                return resp
 
-        if resposta and "não reconhecida" not in str(resposta).lower():
-            return resposta
+        # =============================
+        # 🔎 Contexto Semântico RAG
+        # =============================
+        contexto = dados.get("contexto", "")
 
-        # 🔎 2 — RAG
-        contexto = ""
-        if buscar_contexto_func and vector_db:
+        if not contexto and buscar_contexto_func and vector_db:
             contexto = buscar_contexto_func(pergunta, vector_db)
 
-        # 🌐 3 — IA externa
+        # =============================
+        # 🌐 IA externa opcional
+        # =============================
         if usar_token:
-            resposta_ia = gerar_resposta_ia(pergunta, contexto)
-            if resposta_ia:
-                return resposta_ia
+            resp = gerar_resposta_ia(pergunta, contexto)
+            if resp:
+                return resp
 
-        # 🤖 4 — Modelo local
+        # =============================
+        # 🤖 Modelo local fallback
+        # =============================
         if gerador_local:
             prompt = f"""
 {SYSTEM_PROMPT}
@@ -139,24 +142,27 @@ Contexto:
 
 Pergunta:
 {pergunta}
+
+Resposta:
 """
 
             resultado = gerador_local(
                 prompt,
-                max_length=200,
+                max_new_tokens=120,
                 do_sample=True,
                 temperature=0.7
             )
 
             texto = resultado[0]["generated_text"]
 
-            # 🧹 limpeza básica
-            texto = texto.replace(prompt, "").strip()
+            # limpeza
+            if "Resposta:" in texto:
+                texto = texto.split("Resposta:")[-1]
 
-            return texto if texto else "⚠️ A Guardiã não conseguiu formular resposta."
+            return texto.strip()
 
-        return "⚠️ Nenhum modelo disponível para responder."
+        return "⚠️ Nenhum modelo disponível."
 
     except Exception as e:
-        print("❌ Erro geral IA:", e)
+        print("❌ Erro IA:", e)
         return "⚠️ A Guardiã encontrou um obstáculo mágico."
