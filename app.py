@@ -46,7 +46,7 @@ custom_theme = gr.themes.Soft(
 # =============================
 # 🧱 Interface
 # =============================
-with gr.Blocks() as demo:
+with gr.Blocks(theme=custom_theme) as demo:   # ✅ tema volta aqui
     gr.Markdown(mensagem_inicial)
 
     chatbot = gr.Chatbot(
@@ -95,13 +95,13 @@ with gr.Blocks() as demo:
 
     grafico_trans_btn.click(
         grafico_transacoes_com_historia,
-        inputs=[],
-        outputs=[grafico_out, chatbot, audio_out, entrada]  # gráfico, narrativa, áudio, erro
+        inputs=[None],   # ✅ aceita argumento opcional
+        outputs=[grafico_out, chatbot, audio_out, entrada]
     )
 
     grafico_atend_btn.click(
         grafico_atendimento_com_historia,
-        inputs=[],
+        inputs=[None],   # ✅ aceita argumento opcional
         outputs=[grafico_out, chatbot, audio_out, entrada]
     )
 
@@ -110,7 +110,4 @@ with gr.Blocks() as demo:
 # 🚀 Inicialização
 # =============================
 if __name__ == "__main__":
-    demo.launch(
-        share=True,
-        theme=custom_theme
-    )
+    demo.launch(share=True)
