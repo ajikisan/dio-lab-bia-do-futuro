@@ -24,7 +24,7 @@ from utils.normalizacao import normalizar
 from utils.constantes import sensivel_termos, termos_contato
 
 # 🎨 UI
-from ui.graficos import grafico_transacoes, grafico_atendimentos, capivara_placeholder
+from ui.graficos import grafico_transacoes, grafico_atendimento, capivara_placeholder
 
 
 # =============================
@@ -140,7 +140,7 @@ def responder(pergunta, historico_chat, usar_token=False):
     if "transação" in pergunta.lower():
         grafico = grafico_transacoes(transacoes)
     elif "atendimento" in pergunta.lower():
-        grafico = grafico_atendimentos(historico)
+        grafico = grafico_atendimento(historico)
     else:
         grafico = capivara_placeholder()
 
