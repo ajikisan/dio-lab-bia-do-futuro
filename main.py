@@ -52,15 +52,17 @@ except Exception as e:
 def responder(pergunta, historico_chat, usar_token=False):
     if historico_chat is None:
         historico_chat = []
-
+    
+    # 🛡️ proteção básica
+    historico_chat = historico_chat or []
+    pergunta = pergunta or ""
+    pergunta_norm = normalizar(pergunta)
+    
     resposta = None
     grafico = None
     audio = None
-
-    # 🛡️ proteção básica
-    pergunta = pergunta or ""
-    historico_chat = historico_chat or []
-    pergunta_norm = normalizar(pergunta)
+    narrativa_extra = None
+    
 
     # =============================
     # 💤 Pergunta vazia
@@ -75,6 +77,10 @@ def responder(pergunta, historico_chat, usar_token=False):
         historico_chat.append({"role": "assistant", "content": resposta}) 
         audio = gerar_audio(resposta)
         return "", historico_chat, capivara_placeholder(), audio
+    
+    # ✅ salva pergunta cedo
+    historico_chat.append({"role": "user", "content": pergunta})    
+       
         
     # =============================
     # 🔒 Segurança
@@ -114,22 +120,36 @@ def responder(pergunta, historico_chat, usar_token=False):
         # =============================
         # 🔎 2. RAG
         # =============================
+        contexto = ""
+
         if not resposta:
             try:
                 contexto = buscar_contexto(pergunta, vector_db)
-                if contexto:
-                    resposta = gerar_resposta(pergunta, contexto)
             except Exception as e:
                 print("⚠️ Erro no RAG:", e)
+
 
         # =============================
         # 🤖 3. IA Fallback
         # =============================
         if not resposta:
             try:
-                resposta = gerar_resposta(pergunta)
+                resposta = gerar_resposta(
+                    pergunta,
+                    {
+                        "contexto": contexto,
+                        "transacoes": transacoes,
+                        "historico": historico,
+                        "produtos": produtos,
+                        "perfil": perfil
+                    },
+                    executar,
+                    buscar_contexto,
+                    vector_db,
+                    usar_token
+                    )
             except Exception as e:
-                print("⚠️ Erro na IA Fallback:", e)
+                print("⚠️ Erro na IA Fallback:", e)  
 
         # =============================
         # 🌙 4. Fallback final
@@ -145,16 +165,18 @@ def responder(pergunta, historico_chat, usar_token=False):
     # 🎨 Escolha do gráfico
     # =============================
     if "gráfico" in pergunta.lower():
-        grafico = grafico_transacoes_com_historia(transacoes)
+        grafico, narrativa_extra, audio_extra, _ = grafico_transacoes_com_historia(transacoes)
     elif "atendimento" in pergunta.lower():
-        grafico = grafico_atendimento_com_historia(historico)
+        grafico, narrativa_extra, audio_extra, _ = grafico_atendimento_com_historia(historico)
     else:
         grafico = capivara_placeholder()
+        
+    if narrativa_extra:
+        resposta += "\n\n" + narrativa_extra    
         
     # =============================
     # 💬 Atualiza histórico e gera áudio
     # =============================
-    historico_chat.append({"role": "user", "content": pergunta})
     historico_chat.append({"role": "assistant", "content": resposta})
 
     # 🔊 Áudio (com proteção)
