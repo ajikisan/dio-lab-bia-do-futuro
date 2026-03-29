@@ -16,7 +16,7 @@ from core.audio import gerar_audio
 from core.regras import contato_dev
 
 # 📂 Data
-from data.loader import carregar_dados
+from data.loader import carregar_dados, carregar_vector_db
 
 # 🧰 Utils
 from utils.normalizacao import normalizar
@@ -25,16 +25,23 @@ from utils.constantes import sensivel_termos, termos_contato
 # 🎨 UI
 from ui.graficos import capivara_placeholder
 
-# 📊 Carrega dados ao iniciar
+
+# =============================
+# 📊 Carregamento global (singleton)
+# =============================
 try:
     transacoes, historico, produtos, perfil = carregar_dados()
+    vector_db = carregar_vector_db()
 except Exception as e:
     print("❌ Erro ao carregar dados:", e)
     transacoes, historico, produtos, perfil = None, None, None, None
+    vector_db = None
 
 
-# 🔁 FUNÇÃO PRINCIPAL (ORQUESTRADOR)
-def responder(pergunta, historico_chat, usar_token=False):
+# =============================
+# 🚀 FUNÇÃO PRINCIPAL (ORQUESTRADOR)
+# =============================
+def responder(pergunta, historico_chat=None, usar_token=False):
 
     # 🛡️ proteção básica
     pergunta = pergunta or ""
@@ -42,69 +49,94 @@ def responder(pergunta, historico_chat, usar_token=False):
 
     pergunta_norm = normalizar(pergunta)
 
+    # =============================
     # 💤 Pergunta vazia
+    # =============================
     if not pergunta.strip():
         resposta = (
             "📜 A Guardiã, serena à beira do rio, aguarda sua pergunta "
-            "para abrir os pergaminhos mágicos do Reino das Moedas e   "
+            "para abrir os pergaminhos mágicos do Reino das Moedas e "
             "revelar os segredos do seu tesouro."
         )
 
         historico_chat.append({"role": "assistant", "content": resposta})
-
         audio = gerar_audio(resposta)
 
         return "", historico_chat, capivara_placeholder(), audio
 
-    # 👤 Salva pergunta do usuário
+    # =============================
+    # 👤 Salva pergunta
+    # =============================
     historico_chat.append({"role": "user", "content": pergunta})
 
+    # =============================
     # 🔒 Segurança
+    # =============================
     if any(term in pergunta_norm for term in sensivel_termos):
         resposta = (
             "🔒 Os segredos do reino não podem ser revelados. "
-            "Nem mesmo a Guardiã tem acesso a essas informações," 
+            "Nem mesmo a Guardiã tem acesso a essas informações, "
             "pois estão protegidas por feitiços invioláveis."
         )
 
+    # =============================
     # 📞 Contato com dev
+    # =============================
     elif any(term in pergunta_norm for term in termos_contato):
         resposta = contato_dev()
 
     else:
         resposta = None
 
-        # 🎯 1. Regras (rápido e determinístico)
+        # =============================
+        # 🎯 1. REGRAS
+        # =============================
         try:
-            resposta = executar(pergunta, {
-                "transacoes": transacoes,
-                "perfil": perfil,
-                "produtos": produtos
-            })
+            resposta = executar(
+                pergunta,
+                {
+                    "transacoes": transacoes,
+                    "historico": historico,
+                    "produtos": produtos,
+                    "perfil": perfil
+                }
+            )
         except Exception as e:
             print("⚠️ Erro nas regras:", e)
 
-        # 🔎 2. RAG (se regras não responderam)
+        # =============================
+        # 🔎 2. RAG
+        # =============================
         if not resposta:
             try:
-                contexto = buscar_contexto(pergunta)
+                contexto = buscar_contexto(pergunta, vector_db)
                 if contexto:
-                    resposta = contexto
+                    resposta = gerar_resposta(pergunta, contexto)
             except Exception as e:
                 print("⚠️ Erro no RAG:", e)
 
-        # 🤖 3. IA (fallback final)
+        # =============================
+        # 🤖 3. IA Fallback
+        # =============================
         if not resposta:
             try:
-                resposta = gerar_resposta(pergunta, usar_token=usar_token)
+                resposta = gerar_resposta(pergunta)
             except Exception as e:
-                print("⚠️ Erro na IA:", e)
+                print("⚠️ Erro na IA Fallback:", e)
 
-    # ⚠️ fallback final
-    if not resposta:
-        resposta = "⚠️ A Guardiã não encontrou resposta."
+        # =============================
+        # 🌙 4. Fallback final
+        # =============================
+        if not resposta:
+            resposta = (
+                "🌙 A Guardiã contempla as estrelas do Reino das Moedas, "
+                "mas não encontrou uma resposta clara. "
+                "Reformule sua pergunta ou siga outro caminho da aventura."
+            )
 
-    # 🤖 Salva resposta
+    # =============================
+    # 💬 Atualiza histórico e gera áudio
+    # =============================
     historico_chat.append({"role": "assistant", "content": resposta})
 
     # 🔊 Áudio (com proteção)
@@ -114,4 +146,4 @@ def responder(pergunta, historico_chat, usar_token=False):
         print("⚠️ Erro ao gerar áudio:", e)
         audio = None
 
-    return "", historico_chat, capivara_placeholder(), audio
+    return resposta, historico_chat, capivara_placeholder(), audio
