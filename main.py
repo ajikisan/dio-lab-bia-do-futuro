@@ -2,6 +2,7 @@
 
 import os
 import sys
+import pandas as pd
 
 # 🔧 Garante que os módulos locais funcionem
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -14,6 +15,9 @@ from core.rag import buscar_contexto
 from core.ia import gerar_resposta
 from core.audio import gerar_audio
 from core.regras import contato_dev
+from core.rag import carregar_base, buscar_resposta
+
+
 
 # 📂 Data
 from data.loader import carregar_dados, carregar_vector_db
@@ -41,7 +45,20 @@ except Exception as e:
 # =============================
 # 🚀 FUNÇÃO PRINCIPAL (ORQUESTRADOR)
 # =============================
-def responder(pergunta, historico_chat=None, usar_token=False):
+
+def responder(pergunta, historico_chat, usar_token=False):
+    if historico_chat is None:
+        historico_chat = []
+
+    resposta = buscar_resposta(pergunta)
+
+    # ✅ ajuste: histórico no formato esperado pelo gr.Chatbot (role/content)
+    historico_chat.append({"role": "user", "content": pergunta})
+    historico_chat.append({"role": "assistant", "content": resposta})
+
+    grafico = capivara_placeholder()
+    audio = None
+
 
     # 🛡️ proteção básica
     pergunta = pergunta or ""
@@ -59,16 +76,13 @@ def responder(pergunta, historico_chat=None, usar_token=False):
             "revelar os segredos do seu tesouro."
         )
 
-        # ✅ histórico no formato [pergunta, resposta]
-        historico_chat.append([pergunta, resposta])
+        # ✅ histórico no formato correto (role/content)
+        historico_chat.append({"role": "user", "content": pergunta})
+        historico_chat.append({"role": "assistant", "content": resposta})
+
         audio = gerar_audio(resposta)
-
         return "", historico_chat, capivara_placeholder(), audio
-
-    # =============================
-    # 👤 Salva pergunta (não precisa salvar separado, só no final)
-    # =============================
-
+        
     # =============================
     # 🔒 Segurança
     # =============================
@@ -137,7 +151,8 @@ def responder(pergunta, historico_chat=None, usar_token=False):
     # =============================
     # 💬 Atualiza histórico e gera áudio
     # =============================
-    historico_chat.append([pergunta, resposta])
+    historico_chat.append({"role": "user", "content": pergunta})
+    historico_chat.append({"role": "assistant", "content": resposta})
 
     # 🔊 Áudio (com proteção)
     try:
@@ -146,4 +161,4 @@ def responder(pergunta, historico_chat=None, usar_token=False):
         print("⚠️ Erro ao gerar áudio:", e)
         audio = None
 
-    return resposta, historico_chat, capivara_placeholder(), audio
+    return resposta, historico_chat, grafico, audio    
