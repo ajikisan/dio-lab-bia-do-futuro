@@ -47,21 +47,20 @@ except Exception as e:
 # 🚀 FUNÇÃO PRINCIPAL (ORQUESTRADOR)
 # =============================
 
-def responder(pergunta, historico_chat, usar_token=False):
+def responder(pergunta, historico_chat, usar_token=False, tipo_grafico=None):
     if historico_chat is None:
         historico_chat = []
-    
+
     # 🛡️ proteção básica
     historico_chat = historico_chat or []
     pergunta = pergunta or ""
     pergunta_norm = normalizar(pergunta)
-    
+
     resposta = None
     grafico = None
     audio = None
     narrativa_extra = None
     
-
     # =============================
     # 💤 Pergunta vazia
     # =============================
@@ -75,6 +74,8 @@ def responder(pergunta, historico_chat, usar_token=False):
         # Gera áudio e placeholder de gráfico
         historico_chat.append({"role": "assistant", "content": resposta})
         audio = gerar_audio(resposta)
+        # gráfico placeholder
+        grafico = capivara_placeholder()
                 
         # Retorna imediatamente, sem adicionar ao histórico
         return "", historico_chat, grafico, audio
@@ -97,8 +98,6 @@ def responder(pergunta, historico_chat, usar_token=False):
         resposta = contato_dev()
 
     else:
-        resposta = None
-
         # =============================
         # 🎯 1. REGRAS
         # =============================
@@ -122,7 +121,20 @@ def responder(pergunta, historico_chat, usar_token=False):
             try:
                 contexto = buscar_contexto(pergunta, vector_db)
                 if contexto:
-                    resposta = gerar_resposta(pergunta, contexto)
+                    resposta = gerar_resposta(
+                        pergunta,
+                        {
+                            "contexto": contexto,
+                            "transacoes": transacoes,
+                            "historico": historico,
+                            "produtos": produtos,
+                            "perfil": perfil
+                        },
+                        executar,
+                        buscar_contexto,
+                        vector_db,
+                        usar_token
+                    )
             except Exception as e:
                 print("⚠️ Erro no RAG:", e)
         
@@ -163,16 +175,15 @@ def responder(pergunta, historico_chat, usar_token=False):
     # =============================
     # 🎨 Escolha do gráfico de narração
     # =============================
-    pergunta_lower = pergunta.lower()
-    if "gráfico de transações" in pergunta_lower:
+    if tipo_grafico == "transacoes":
         grafico, narrativa_extra, _, _ = grafico_transacoes_com_historia(transacoes)
-    elif "gráfico de atendimentos" in pergunta_lower:
+    elif tipo_grafico == "atendimentos":
         grafico, narrativa_extra, _, _ = grafico_atendimento_com_historia(historico)
     else:
         grafico = capivara_placeholder()
-    
+
     if narrativa_extra:
-        resposta += "\n\n" + narrativa_extra    
+        resposta += "\n\n" + narrativa_extra
 
     # =============================
     # 💬 Atualiza histórico apenas se houver pergunta válida
@@ -180,8 +191,7 @@ def responder(pergunta, historico_chat, usar_token=False):
     historico_chat.append({"role": "user", "content": pergunta})
     historico_chat.append({"role": "assistant", "content": resposta})
 
-  
-    
+      
     # =============================
     # 🔊 Áudio (com proteção)
     # =============================
