@@ -24,7 +24,7 @@ from utils.normalizacao import normalizar
 from utils.constantes import sensivel_termos, termos_contato
 
 # 🎨 UI
-from ui.graficos import capivara_placeholder
+from ui.graficos import grafico_transacoes, grafico_atendimentos, capivara_placeholder
 
 
 # =============================
@@ -48,18 +48,12 @@ def responder(pergunta, historico_chat, usar_token=False):
         historico_chat = []
 
     resposta = None
-
-    # ✅ ajuste: histórico no formato esperado pelo gr.Chatbot (role/content)
-    historico_chat.append({"role": "user", "content": pergunta})
-    
-    grafico = capivara_placeholder()
+    grafico = None
     audio = None
-
 
     # 🛡️ proteção básica
     pergunta = pergunta or ""
     historico_chat = historico_chat or []
-
     pergunta_norm = normalizar(pergunta)
 
     # =============================
@@ -71,11 +65,7 @@ def responder(pergunta, historico_chat, usar_token=False):
             "para abrir os pergaminhos mágicos do Reino das Moedas e "
             "revelar os segredos do seu tesouro."
         )
-
-        # ✅ histórico no formato correto (role/content)
-        historico_chat.append({"role": "user", "content": pergunta})
-        historico_chat.append({"role": "assistant", "content": resposta})
-
+      
         audio = gerar_audio(resposta)
         return "", historico_chat, capivara_placeholder(), audio
         
@@ -145,6 +135,17 @@ def responder(pergunta, historico_chat, usar_token=False):
             )
 
     # =============================
+    # 🎨 Escolha do gráfico
+    # =============================
+    if "transação" in pergunta.lower():
+        grafico = grafico_transacoes(transacoes)
+    elif "atendimento" in pergunta.lower():
+        grafico = grafico_atendimentos(historico)
+    else:
+        grafico = capivara_placeholder()
+
+    
+    # =============================
     # 💬 Atualiza histórico e gera áudio
     # =============================
     historico_chat.append({"role": "user", "content": pergunta})
@@ -156,5 +157,4 @@ def responder(pergunta, historico_chat, usar_token=False):
     except Exception as e:
         print("⚠️ Erro ao gerar áudio:", e)
         audio = None
-
-    return resposta, historico_chat, grafico, audio    
+    return resposta, historico_chat, grafico, audio     
