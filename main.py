@@ -27,8 +27,6 @@ from utils.constantes import sensivel_termos, termos_contato
 from ui.graficos import (
     grafico_atendimento_com_historia,
     grafico_transacoes_com_historia,
-    grafico_atendimento,
-    grafico_transacoes, 
     capivara_placeholder
 )
 
@@ -74,12 +72,12 @@ def responder(pergunta, historico_chat, usar_token=False):
             "revelar os segredos do seu tesouro."
         )
 
-        historico_chat.append({"role": "assistant", "content": resposta}) 
+        # Gera áudio e placeholder de gráfico
         audio = gerar_audio(resposta)
-        return "", historico_chat, capivara_placeholder(), audio
-    
-    # ✅ salva pergunta cedo
-    historico_chat.append({"role": "user", "content": pergunta})    
+        grafico = capivara_placeholder()
+        
+        # Retorna imediatamente, sem adicionar ao histórico
+        return "", historico_chat, grafico, audio
        
         
     # =============================
@@ -120,15 +118,14 @@ def responder(pergunta, historico_chat, usar_token=False):
         # =============================
         # 🔎 2. RAG
         # =============================
-        contexto = ""
-
         if not resposta:
             try:
                 contexto = buscar_contexto(pergunta, vector_db)
+                if contexto:
+                    resposta = gerar_resposta(pergunta, contexto)
             except Exception as e:
                 print("⚠️ Erro no RAG:", e)
-
-
+        
         # =============================
         # 🤖 3. IA Fallback
         # =============================
@@ -137,7 +134,7 @@ def responder(pergunta, historico_chat, usar_token=False):
                 resposta = gerar_resposta(
                     pergunta,
                     {
-                        "contexto": contexto,
+                        "contexto": contexto if 'contexto' in locals() else "",
                         "transacoes": transacoes,
                         "historico": historico,
                         "produtos": produtos,
@@ -147,9 +144,10 @@ def responder(pergunta, historico_chat, usar_token=False):
                     buscar_contexto,
                     vector_db,
                     usar_token
-                    )
+                )
             except Exception as e:
-                print("⚠️ Erro na IA Fallback:", e)  
+                print("⚠️ Erro na IA Fallback:", e)
+        
 
         # =============================
         # 🌙 4. Fallback final
@@ -161,25 +159,32 @@ def responder(pergunta, historico_chat, usar_token=False):
                 "Reformule sua pergunta ou siga outro caminho da aventura."
             )
 
+
     # =============================
-    # 🎨 Escolha do gráfico
+    # 💬 Atualiza histórico apenas se houver pergunta válida
     # =============================
-    if "gráfico" in pergunta.lower():
+    historico_chat.append({"role": "user", "content": pergunta})
+    historico_chat.append({"role": "assistant", "content": resposta})
+
+
+    # =============================
+    # 🎨 Escolha do gráfico de narração
+    # =============================
+    if "gráfico de transações" in pergunta.lower():
         grafico, narrativa_extra, audio_extra, _ = grafico_transacoes_com_historia(transacoes)
-    elif "atendimento" in pergunta.lower():
+    elif "gráfico de atendimentos" in pergunta.lower():
         grafico, narrativa_extra, audio_extra, _ = grafico_atendimento_com_historia(historico)
     else:
         grafico = capivara_placeholder()
-        
-    if narrativa_extra:
-        resposta += "\n\n" + narrativa_extra    
-        
-    # =============================
-    # 💬 Atualiza histórico e gera áudio
-    # =============================
-    historico_chat.append({"role": "assistant", "content": resposta})
 
+    if narrativa_extra:
+        resposta += "\n\n" + narrativa_extra
+
+    
+    # =============================
     # 🔊 Áudio (com proteção)
+    # =============================
+    
     try:
         audio = gerar_audio(resposta)
     except Exception as e:
