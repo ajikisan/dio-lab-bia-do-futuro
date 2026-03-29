@@ -24,7 +24,13 @@ from utils.normalizacao import normalizar
 from utils.constantes import sensivel_termos, termos_contato
 
 # 🎨 UI
-from ui.graficos import grafico_transacoes, grafico_atendimento, capivara_placeholder
+from ui.graficos import (
+    grafico_atendimento_com_historia,
+    grafico_transacoes_com_historia,
+    grafico_atendimento,
+    grafico_transacoes, 
+    capivara_placeholder
+)
 
 
 # =============================
@@ -65,7 +71,8 @@ def responder(pergunta, historico_chat, usar_token=False):
             "para abrir os pergaminhos mágicos do Reino das Moedas e "
             "revelar os segredos do seu tesouro."
         )
-      
+
+        historico_chat.append({"role": "assistant", "content": resposta}) 
         audio = gerar_audio(resposta)
         return "", historico_chat, capivara_placeholder(), audio
         
@@ -137,14 +144,13 @@ def responder(pergunta, historico_chat, usar_token=False):
     # =============================
     # 🎨 Escolha do gráfico
     # =============================
-    if "transação" in pergunta.lower():
-        grafico = grafico_transacoes(transacoes)
+    if "gráfico" in pergunta.lower():
+        grafico = grafico_transacoes_com_historia(transacoes)
     elif "atendimento" in pergunta.lower():
-        grafico = grafico_atendimento(historico)
+        grafico = grafico_atendimento_com_historia(historico)
     else:
         grafico = capivara_placeholder()
-
-    
+        
     # =============================
     # 💬 Atualiza histórico e gera áudio
     # =============================
