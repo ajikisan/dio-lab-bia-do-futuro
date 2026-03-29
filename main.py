@@ -47,12 +47,11 @@ def responder(pergunta, historico_chat, usar_token=False):
     if historico_chat is None:
         historico_chat = []
 
-    resposta = buscar_resposta(pergunta)
+    resposta = None
 
     # ✅ ajuste: histórico no formato esperado pelo gr.Chatbot (role/content)
     historico_chat.append({"role": "user", "content": pergunta})
-    historico_chat.append({"role": "assistant", "content": resposta})
-
+    
     grafico = capivara_placeholder()
     audio = None
 
