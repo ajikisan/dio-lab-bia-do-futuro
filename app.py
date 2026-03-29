@@ -69,11 +69,9 @@ with gr.Blocks(theme=custom_theme) as demo:
         grafico_atend_full_btn = gr.Button("📞 Gráfico de Atendimentos")
 
     # Saídas
-        grafico_out = gr.Image(
-        label="Visualização",
-        value=capivara_placeholder()  # <-- Capivara já aparece ao iniciar
-    )
-    audio_out = gr.Audio(label="Resposta em áudio", type="filepath")    
+    grafico_out = gr.Image(label="Visualização")
+    audio_out = gr.Audio(label="Resposta em áudio", type="filepath")
+
       
 
     # =============================
