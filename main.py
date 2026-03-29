@@ -15,9 +15,6 @@ from core.rag import buscar_contexto
 from core.ia import gerar_resposta
 from core.audio import gerar_audio
 from core.regras import contato_dev
-from core.rag import buscar_resposta
-
-
 
 # 📂 Data
 from data.loader import carregar_dados, carregar_vector_db
