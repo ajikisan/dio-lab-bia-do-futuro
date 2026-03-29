@@ -28,7 +28,7 @@ def limpar_ui():
     return "", [], capivara_placeholder(), None
 
 # =============================
-# 🎨 Interface Gradio com tema
+# 🎨 Interface Gradio com tema 
 # =============================
 custom_theme = gr.themes.Soft(
     primary_hue="violet",
@@ -38,15 +38,14 @@ custom_theme = gr.themes.Soft(
     body_background_fill="linear-gradient(135deg, #f5f3ff, #ede9fe)",
     button_primary_background_fill="linear-gradient(90deg, #7c3aed, #9333ea)",
     button_primary_background_fill_hover="linear-gradient(90deg, #6d28d9, #7c3aed)",
-    button_secondary_background_fill="linear-gradient(90deg, #a78bfa, #c4b5fd)",
-    chatbot_background_fill="linear-gradient(135deg, #faf5ff, #f3e8ff)"
+    button_secondary_background_fill="linear-gradient(90deg, #a78bfa, #c4b5fd)"    
 )
 
 with gr.Blocks(theme=custom_theme) as demo:
     gr.Markdown(mensagem_inicial)
 
-    chatbot = gr.Chatbot(label="Capivara Financeira")
-    entrada = gr.Textbox(label="Faça sua pergunta", placeholder="Digite aqui...")
+    chatbot = gr.Chatbot(label="Capivara Financeira no Reino das Moedas")
+    entrada = gr.Textbox(label="Pergunte sobre suas moedas", placeholder="Digite aqui...")
     enviar_btn = gr.Button("🪄 Enviar")
     limpar_btn = gr.Button("🧹 Limpar conversa")
     audio_out = gr.Audio(label="Resposta em áudio", type="filepath")
