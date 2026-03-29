@@ -21,7 +21,7 @@ Sempre ao seu lado, sem substituir o valor das conversas humanas.
 # =============================
 def responder_ui(pergunta, historico_chat):
     resposta, historico_chat, grafico, audio = responder(pergunta, historico_chat)
-    return "", historico_chat, grafico, audio  # primeiro valor sempre vazio → limpa input
+    return "", historico_chat, grafico, audio  # limpa input automaticamente
 
 
 def limpar_ui():
@@ -46,13 +46,13 @@ custom_theme = gr.themes.Soft(
 # =============================
 # 🧱 Interface
 # =============================
-with gr.Blocks(theme=custom_theme) as demo:   # ✅ tema volta aqui
+with gr.Blocks(theme=custom_theme) as demo:
     gr.Markdown(mensagem_inicial)
 
     chatbot = gr.Chatbot(
         label="Capivara Financeira no Reino das Moedas",
-        type="messages",          # ✅ formato novo
-        allow_tags=False          # ✅ evita warning futuro
+        type="messages",
+        allow_tags=False
     )
 
     entrada = gr.Textbox(
@@ -69,9 +69,7 @@ with gr.Blocks(theme=custom_theme) as demo:   # ✅ tema volta aqui
     grafico_out = gr.Image(label="Visualização")
     audio_out = gr.Audio(label="Resposta em áudio", type="filepath")
 
-    # =============================
     # 🔁 Fluxo principal
-    # =============================
     def fluxo(pergunta, chat_hist):
         return responder_ui(pergunta, chat_hist)
 
@@ -95,19 +93,17 @@ with gr.Blocks(theme=custom_theme) as demo:   # ✅ tema volta aqui
 
     grafico_trans_btn.click(
         grafico_transacoes_com_historia,
-        inputs=[None],   # ✅ aceita argumento opcional
+        inputs=[],   # ✅ sem inputs, aceita None
         outputs=[grafico_out, chatbot, audio_out, entrada]
     )
 
     grafico_atend_btn.click(
         grafico_atendimento_com_historia,
-        inputs=[None],   # ✅ aceita argumento opcional
+        inputs=[],
         outputs=[grafico_out, chatbot, audio_out, entrada]
     )
 
 
-# =============================
 # 🚀 Inicialização
-# =============================
 if __name__ == "__main__":
     demo.launch(share=True)
