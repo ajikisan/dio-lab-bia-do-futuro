@@ -113,3 +113,24 @@ def narrativa_transacoes(transacoes):
             saldo = entrada - saida
             narrativa += f"- {categoria}: entrada {entrada}, saída {saida}, saldo {saldo}\n"
         return narrativa
+    except Exception as e:
+        return f"Erro na narrativa: {str(e)}"
+
+# --- Gráfico + Narrativa + Áudio ---
+def grafico_atendimento_com_historia(historico=None):
+    try:
+        fig_img = grafico_atendimento(historico)
+        narrativa = narrativa_historico(historico)
+        audio = gerar_audio(narrativa) if narrativa else None
+        return fig_img, narrativa, audio, None
+    except Exception as e:
+        return None, None, None, str(e)
+
+def grafico_transacoes_com_historia(transacoes=None):
+    try:
+        fig_img = grafico_transacoes(transacoes)
+        narrativa = narrativa_transacoes(transacoes)
+        audio = gerar_audio(narrativa) if narrativa else None
+        return fig_img, narrativa, audio, None
+    except Exception as e:
+        return None, None, None, str(e)
