@@ -2,6 +2,8 @@
 
 import matplotlib.pyplot as plt
 import os
+import io
+from PIL import Image
 
 # 🔊 Importa áudio corretamente
 from core.audio import gerar_audio
@@ -11,17 +13,29 @@ from core.audio import gerar_audio
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
+# =============================
+# 🔁 Helper: converte fig → imagem
+# =============================
+def fig_to_image(fig):
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", bbox_inches="tight")
+    buf.seek(0)
+
+    img = Image.open(buf).convert("RGB")
+
+    plt.close(fig)
+    return img
+
+
 # --- Placeholder gráfico ---
 def capivara_placeholder():
     fig, ax = plt.subplots(figsize=(4, 4))
-    plt.close(fig)
     ax.axis("off")
 
     try:
-        # Caminho robusto (funciona local + Colab + deploy)
         caminho_imagem = os.path.join(BASE_DIR, "assets", "capivara_webp.webp")
-
         img = plt.imread(caminho_imagem)
+
         ax.imshow(img, aspect="equal")
         ax.set_xlim(0, img.shape[1])
         ax.set_ylim(img.shape[0], 0)
@@ -36,13 +50,12 @@ def capivara_placeholder():
         )
 
     plt.tight_layout()
-    return fig
+    return fig_to_image(fig)
 
 
 # --- Gráfico de Atendimento ---
 def grafico_atendimento(historico):
     fig, ax = plt.subplots(figsize=(4, 4))
-    plt.close(fig)
 
     try:
         if historico is None or historico.empty:
@@ -67,13 +80,12 @@ def grafico_atendimento(historico):
         ax.axis("off")
 
     plt.tight_layout()
-    return fig
+    return fig_to_image(fig)
 
 
 # --- Gráfico de Transações ---
 def grafico_transacoes(transacoes):
     fig, ax = plt.subplots(figsize=(7, 5))
-    plt.close(fig)
 
     try:
         if transacoes is None or transacoes.empty:
@@ -122,7 +134,7 @@ def grafico_transacoes(transacoes):
         ax.axis("off")
 
     plt.tight_layout()
-    return fig
+    return fig_to_image(fig)
 
 
 # --- Narrativa Histórico ---
@@ -193,11 +205,11 @@ def narrativa_transacoes(transacoes):
 # --- Gráfico + Narrativa + Áudio ---
 def grafico_atendimento_com_historia(historico):
     try:
-        fig = grafico_atendimento(historico)
+        fig_img = grafico_atendimento(historico)
         narrativa = narrativa_historico(historico)
         audio = gerar_audio(narrativa) if narrativa else None
 
-        return fig, narrativa, audio, None
+        return fig_img, narrativa, audio, None
 
     except Exception as e:
         return None, None, None, str(e)
@@ -205,11 +217,11 @@ def grafico_atendimento_com_historia(historico):
 
 def grafico_transacoes_com_historia(transacoes):
     try:
-        fig = grafico_transacoes(transacoes)
+        fig_img = grafico_transacoes(transacoes)
         narrativa = narrativa_transacoes(transacoes)
         audio = gerar_audio(narrativa) if narrativa else None
 
-        return fig, narrativa, audio, None
+        return fig_img, narrativa, audio, None
 
     except Exception as e:
         return None, None, None, str(e)
