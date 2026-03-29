@@ -59,15 +59,15 @@ def responder(pergunta, historico_chat=None, usar_token=False):
             "revelar os segredos do seu tesouro."
         )
 
-        historico_chat.append({"role": "assistant", "content": resposta})
+        # ✅ histórico no formato [pergunta, resposta]
+        historico_chat.append([pergunta, resposta])
         audio = gerar_audio(resposta)
 
         return "", historico_chat, capivara_placeholder(), audio
 
     # =============================
-    # 👤 Salva pergunta
+    # 👤 Salva pergunta (não precisa salvar separado, só no final)
     # =============================
-    historico_chat.append({"role": "user", "content": pergunta})
 
     # =============================
     # 🔒 Segurança
@@ -137,7 +137,7 @@ def responder(pergunta, historico_chat=None, usar_token=False):
     # =============================
     # 💬 Atualiza histórico e gera áudio
     # =============================
-    historico_chat.append({"role": "assistant", "content": resposta})
+    historico_chat.append([pergunta, resposta])
 
     # 🔊 Áudio (com proteção)
     try:
