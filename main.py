@@ -73,9 +73,9 @@ def responder(pergunta, historico_chat, usar_token=False):
         )
 
         # Gera áudio e placeholder de gráfico
+        historico_chat.append({"role": "assistant", "content": resposta})
         audio = gerar_audio(resposta)
-        grafico = capivara_placeholder()
-        
+                
         # Retorna imediatamente, sem adicionar ao histórico
         return "", historico_chat, grafico, audio
        
@@ -161,25 +161,26 @@ def responder(pergunta, historico_chat, usar_token=False):
 
 
     # =============================
+    # 🎨 Escolha do gráfico de narração
+    # =============================
+    pergunta_lower = pergunta.lower()
+    if "gráfico de transações" in pergunta_lower:
+        grafico, narrativa_extra, _, _ = grafico_transacoes_com_historia(transacoes)
+    elif "gráfico de atendimentos" in pergunta_lower:
+        grafico, narrativa_extra, _, _ = grafico_atendimento_com_historia(historico)
+    else:
+        grafico = capivara_placeholder()
+    
+    if narrativa_extra:
+        resposta += "\n\n" + narrativa_extra    
+
+    # =============================
     # 💬 Atualiza histórico apenas se houver pergunta válida
     # =============================
     historico_chat.append({"role": "user", "content": pergunta})
     historico_chat.append({"role": "assistant", "content": resposta})
 
-
-    # =============================
-    # 🎨 Escolha do gráfico de narração
-    # =============================
-    if "gráfico de transações" in pergunta.lower():
-        grafico, narrativa_extra, audio_extra, _ = grafico_transacoes_com_historia(transacoes)
-    elif "gráfico de atendimentos" in pergunta.lower():
-        grafico, narrativa_extra, audio_extra, _ = grafico_atendimento_com_historia(historico)
-    else:
-        grafico = capivara_placeholder()
-
-    if narrativa_extra:
-        resposta += "\n\n" + narrativa_extra
-
+  
     
     # =============================
     # 🔊 Áudio (com proteção)
