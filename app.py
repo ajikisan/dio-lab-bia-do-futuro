@@ -1,4 +1,4 @@
-# 🌐 app.py — Interface Gradio Completa
+# 🌐 app.py — Interface Gradio
 
 import gradio as gr
 from main import responder
@@ -48,7 +48,7 @@ custom_theme = gr.themes.Soft(
 with gr.Blocks(theme=custom_theme) as demo:
     gr.Markdown(mensagem_inicial)
 
-    # Chat + Input
+    # Chat e entrada de texto
     chatbot = gr.Chatbot(
         label="Capivara Financeira no Reino das Moedas",
         type="messages",
@@ -59,18 +59,22 @@ with gr.Blocks(theme=custom_theme) as demo:
         placeholder="Digite aqui..."
     )
 
-    # Botões
+    # Botões de controle
     with gr.Row():
         enviar_btn = gr.Button("🚀 Enviar")
         limpar_btn = gr.Button("🧹 Limpar")
-        grafico_trans_btn = gr.Button("📊 Gráfico de Transações (simples)")
-        grafico_atend_btn = gr.Button("📞 Gráfico de Atendimentos (simples)")
-        grafico_trans_full_btn = gr.Button("📊 Gráfico de Transações (com chat+áudio)")
-        grafico_atend_full_btn = gr.Button("📞 Gráfico de Atendimentos (com chat+áudio)")
+        
+        
+        grafico_trans_full_btn = gr.Button("📊 Gráfico de Transações")
+        grafico_atend_full_btn = gr.Button("📞 Gráfico de Atendimentos")
 
     # Saídas
-    grafico_out = gr.Image(label="Visualização")
-    audio_out = gr.Audio(label="Resposta em áudio", type="filepath")
+        grafico_out = gr.Image(
+        label="Visualização",
+        value=capivara_placeholder()  # <-- Capivara já aparece ao iniciar
+    )
+    audio_out = gr.Audio(label="Resposta em áudio", type="filepath")    
+      
 
     # =============================
     # 🔄 Função principal do fluxo
@@ -98,13 +102,7 @@ with gr.Blocks(theme=custom_theme) as demo:
         inputs=[],
         outputs=[entrada, chatbot, grafico_out, audio_out]
     )
-
-    # =============================
-    # 📊 Botões simples (apenas gráfico)
-    # =============================
-    grafico_trans_btn.click(fn=grafico_transacoes_com_historia, inputs=[], outputs=[grafico_out])
-    grafico_atend_btn.click(fn=grafico_atendimento_com_historia, inputs=[], outputs=[grafico_out])
-
+    
     # =============================
     # 📊 Botões completos (gráfico + chat + áudio)
     # =============================
