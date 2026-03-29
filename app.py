@@ -61,10 +61,12 @@ with gr.Blocks(theme=custom_theme) as demo:
     )
 
     with gr.Row():
-        enviar_btn = gr.Button("🪄 Enviar")
-        limpar_btn = gr.Button("🧹 Limpar conversa")
-        grafico_trans_btn = gr.Button("📊 Ver gráfico de transações")
-        grafico_atend_btn = gr.Button("📞 Ver gráfico de atendimentos")
+        enviar_btn = gr.Button("🚀 Enviar")
+        limpar_btn = gr.Button("🧹 Limpar")
+        grafico_trans_btn = gr.Button("📊 Gráfico de Transações")
+        grafico_atend_btn = gr.Button("📞 Gráfico de Atendimentos")
+      
+
 
     grafico_out = gr.Image(label="Visualização")
     audio_out = gr.Audio(label="Resposta em áudio", type="filepath")
@@ -91,18 +93,18 @@ with gr.Blocks(theme=custom_theme) as demo:
         outputs=[entrada, chatbot, grafico_out, audio_out]
     )
 
+    # 📊 Botões de gráficos
     grafico_trans_btn.click(
-        grafico_transacoes_com_historia,
-        inputs=[],   # ✅ sem inputs, aceita None
-        outputs=[grafico_out, chatbot, audio_out, entrada]
+        fn=lambda: responder("gráfico transações", [], False),
+        inputs=[],
+        outputs=[entrada, chatbot, grafico_out, audio_out]
     )
 
     grafico_atend_btn.click(
-        grafico_atendimento_com_historia,
+        fn=lambda: responder("atendimento", [], False),
         inputs=[],
-        outputs=[grafico_out, chatbot, audio_out, entrada]
+        outputs=[entrada, chatbot, grafico_out, audio_out]
     )
-
 
 # 🚀 Inicialização
 if __name__ == "__main__":
