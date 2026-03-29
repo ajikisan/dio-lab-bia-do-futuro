@@ -15,7 +15,7 @@ from core.rag import buscar_contexto
 from core.ia import gerar_resposta
 from core.audio import gerar_audio
 from core.regras import contato_dev
-from core.rag import carregar_base, buscar_resposta
+from core.rag import buscar_resposta
 
 
 
