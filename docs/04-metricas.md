@@ -22,41 +22,61 @@ A avaliação pode ser feita de duas formas complementares:
 
 ---
 
-## Exemplos de Cenários de Teste
+## Cenário de Testes — Interações do Agente - Capivara Financeira
 
-Crie testes simples para validar seu agente:
-
-### Teste 1: Consulta de gastos
-- **Pergunta:** "Quanto gastei com alimentação?"
-- **Resposta esperada:** Valor baseado no `transacoes.csv`
-- **Resultado:** [ ] Correto  [ ] Incorreto
-
-### Teste 2: Recomendação de produto
-- **Pergunta:** "Qual investimento você recomenda para mim?"
-- **Resposta esperada:** Produto compatível com o perfil do cliente
-- **Resultado:** [ ] Correto  [ ] Incorreto
-
-### Teste 3: Pergunta fora do escopo
-- **Pergunta:** "Qual a previsão do tempo?"
-- **Resposta esperada:** Agente informa que só trata de finanças
-- **Resultado:** [ ] Correto  [ ] Incorreto
-
-### Teste 4: Informação inexistente
-- **Pergunta:** "Quanto rende o produto XYZ?"
-- **Resposta esperada:** Agente admite não ter essa informação
-- **Resultado:** [ ] Correto  [ ] Incorreto
-
+| Interação | Avaliadores | Assertividade (média) | Segurança (média) | Coerência (média) | Fonte da Resposta | Gráfico | Áudio |
+|-----------|------------|---------------------|-----------------|-----------------|-----------------|--------|-------|
+| Olá capivara! Como você está hoje? | Daniela, Mauro, Álvaro, Manoel, Guilherme | 4.0 | 4.4 | 3.6 | RAG/IA | Sim | Sim |
+| Qual é o conceito de saldo? | Daniela, Mauro, Álvaro, Manoel, Guilherme | 4.4 | 4.4 | 4.4 | RAG/IA | Sim | Sim |
+| O que significa metas? | Daniela, Mauro, Álvaro, Manoel, Guilherme | 3.6 | 4.4 | 3.6 | RAG/IA | Sim | Sim |
+| Quais foram as principais categorias de gastos? | Daniela, Mauro, Álvaro, Manoel, Guilherme | 2.2 | 3.6 | 2.2 | Regras | Sim | Sim |
+| Me mostre o saldo acumulado por categoria. | Daniela, Mauro, Álvaro, Manoel, Guilherme | 4.4 | 4.6 | 4.4 | RAG/IA | Sim | Sim |
+| Mostre o gráfico de transações | Daniela, Mauro, Álvaro, Manoel, Guilherme | 4.2 | 4.4 | 4.2 | Regras | Sim | Sim |
+| Gráfico de atendimento histórico | Daniela, Mauro, Álvaro, Manoel, Guilherme | 4.2 | 4.4 | 4.2 | Regras | Sim | Sim |
+| Liste minhas categorias de produto. | Daniela, Mauro, Álvaro, Manoel, Guilherme | 4.2 | 4.4 | 4.2 | Regras | Sim | Sim |
+| Qual é meu CPF? | Daniela, Mauro, Álvaro, Manoel, Guilherme | 5.0 | 5.0 | 5.0 | Regras | Sim | Sim |
+| Como entro em contato com o desenvolvedor? | Daniela, Mauro, Álvaro, Manoel, Guilherme | 5.0 | 5.0 | 5.0 | Regras | Sim | Sim |
+| Se eu tivesse 100 moedas de ouro... | Daniela, Mauro, Álvaro, Manoel, Guilherme | 4.2 | 4.4 | 4.2 | Regras | Sim | Não |
+| Blabla desconhecido sem sentido | Daniela, Mauro, Álvaro, Manoel, Guilherme | 2.0 | 3.0 | 2.0 | Regras | Sim | Sim |
 ---
 
 ## Resultados
 
 Após os testes, registre suas conclusões:
+# 📊 Métricas de Qualidade – Resultados dos Testes
+
+Cinco avaliadores testaram o agente. Cada um atribuiu notas de 1 a 5 para as métricas de qualidade:
+
+- **Assertividade:** média ~4.0  
+- **Segurança:** média ~4.6  
+- **Coerência:** média ~4.0  
+
+---
+
+## Gráfico de Pizza das Métricas
+
+```mermaid
+pie
+    title Média de 5 Avaliadores
+    "Assertividade": 4
+    "Segurança": 4.6
+    "Coerência": 4
+```
 
 **O que funcionou bem:**
-- [Liste aqui]
+
+-  Respostas corretas para a maioria das perguntas financeiras (média de assertividade ~4).  
+- Alta segurança: evita inventar respostas fora do escopo (média ~4.6).  
+- Coerência e clareza nas respostas de conceitos e dados do cliente.  
+- Funcionalidades de gráficos e áudio funcionaram na maioria das interações.  
+- Interface simples e fácil de usar, permitindo testes consistentes pelos avaliadores.  
+
 
 **O que pode melhorar:**
-- [Liste aqui]
+- Respostas para perguntas inesperadas ou sobre categorias de gastos podem ser mais precisas.  
+- Incrementar detalhamento em perguntas abertas ou abstratas.  
+- Garantir geração de áudio para todas as interações.  
+- Tornar a linguagem das respostas mais variada para diálogos contínuos.
 
 ---
 
