@@ -18,7 +18,7 @@ Criar uma experiência interativa que:
 * 🤖 Gera respostas com IA
 * 🎭 Apresenta resultados com narrativa gamificada
 * 🔊 Converte respostas em áudio
-* 📈 Exibe gráficos interativos
+* 📈 Exibe gráficos interativos com histórico de narração
 
 ---
 
@@ -67,17 +67,22 @@ A resposta do sistema segue 3 camadas:
 
 1. ⚡ **Regras (rápido)**
 
-   * Regex + lógica determinística
+   * Regex + lógica determinística para respostas imediatas
 
-2. 🔎 **RAG (contexto)**
+2. 🔎 **RAG Retrieval-Augmented Generation (contexto)**
 
-   * Busca semântica com FAISS
+   * Busca semântica com FAISS Facebook AI Similarity Search
    * Base: transações, histórico, produtos, perfil
 
-3. 🤖 **IA (fallback)**
+3. 🤖 **IA Inteligência Artificial (fallback)**
 
    * HuggingFace API ou modelo local
    * Geração de resposta natural
+   
+4. 📊 **Gráficos Full**
+
+   * Botões dedicados para visualização de transações ou atendimentos
+   * Narrativa incluída diretamente no chat e áudio
 
 ---
 
@@ -143,7 +148,7 @@ python app.py
 ✔️ Interface interativa com Gradio
 ✔️ Narrativa gamificada (UX diferenciada)
 ✔️ Geração de áudio (TTS)
-✔️ Visualização de dados
+✔️ Visualização de dados com storytelling
 
 ---
 
