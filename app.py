@@ -105,25 +105,12 @@ with gr.Blocks(theme=custom_theme) as demo:
     # 📊 Botões completos (gráfico + chat + áudio)
     # =============================
     grafico_trans_full_btn.click(
-        fn=lambda: responder(
-            pergunta="",
-            historico_chat=[],
-            usar_token=False,
-            tipo_grafico="transacoes"
-        ),
-        inputs=[],
-        outputs=[entrada, chatbot, grafico_out, audio_out]
+        lambda: responder(historico_chat=[], tipo_grafico="transacoes"),
+        inputs=[], outputs=[entrada, chatbot, grafico_out, audio_out]
     )
-
     grafico_atend_full_btn.click(
-        fn=lambda: responder(
-            pergunta="",
-            historico_chat=[],
-            usar_token=False,
-            tipo_grafico="atendimentos"
-        ),
-        inputs=[],
-        outputs=[entrada, chatbot, grafico_out, audio_out]
+        lambda: responder(historico_chat=[], tipo_grafico="atendimentos"),
+        inputs=[], outputs=[entrada, chatbot, grafico_out, audio_out]
     )
 
 # =============================
