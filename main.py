@@ -45,6 +45,7 @@ except Exception as e:
 # =============================
 # 🚀 FUNÇÃO PRINCIPAL (ORQUESTRADOR)
 # =============================
+
 def responder(pergunta="", historico_chat=None, usar_token=False, tipo_grafico=None):
     # 🛡️ proteção básica
     historico_chat = historico_chat or []
@@ -55,28 +56,37 @@ def responder(pergunta="", historico_chat=None, usar_token=False, tipo_grafico=N
     grafico = capivara_placeholder()
     audio = None
     narrativa_extra = None
+    contexto = ""
 
-    
     # =============================
-    # 💤 Pergunta vazia ou botões de gráfico
+    # 📊 BOTÕES DE GRÁFICO (sem pergunta)
     # =============================
     if not pergunta.strip() and tipo_grafico:
         if tipo_grafico == "transacoes":
             grafico, narrativa_extra, _, _ = grafico_transacoes_com_historia(transacoes)
         elif tipo_grafico == "atendimentos":
             grafico, narrativa_extra, _, _ = grafico_atendimento_com_historia(historico)
-        resposta = narrativa_extra or "📜 Aqui está o gráfico do seu reino financeiro!"
+
+        resposta = "📊 Veja como está seu reino:\n\n" + (narrativa_extra or "")
+
+        historico_chat.append({"role": "assistant", "content": resposta})
         audio = gerar_audio(resposta)
+
         return "", historico_chat, grafico, audio
 
+    # =============================
+    # 💤 Pergunta vazia (normal)
+    # =============================
     if not pergunta.strip():
         resposta = (
             "📜 A Guardiã, serena à beira do rio, aguarda sua pergunta "
             "para abrir os pergaminhos mágicos do Reino das Moedas e "
             "revelar os segredos do seu tesouro."
         )
+
         historico_chat.append({"role": "assistant", "content": resposta})
         audio = gerar_audio(resposta)
+
         return "", historico_chat, grafico, audio
 
     # =============================
@@ -88,16 +98,17 @@ def responder(pergunta="", historico_chat=None, usar_token=False, tipo_grafico=N
             "Nem mesmo a Guardiã tem acesso a essas informações, "
             "pois estão protegidas por feitiços invioláveis."
         )
+ 
 
     # =============================
-    # 📞 Contato com dev
+    # 📞 Contato
     # =============================
     elif any(term in pergunta_norm for term in termos_contato):
         resposta = contato_dev()
 
     else:
         # =============================
-        # 🎯 1. REGRAS
+        # 🎯 REGRAS
         # =============================
         try:
             resposta = executar(
@@ -113,7 +124,7 @@ def responder(pergunta="", historico_chat=None, usar_token=False, tipo_grafico=N
             print("⚠️ Erro nas regras:", e)
 
         # =============================
-        # 🔎 2. RAG
+        # 🔎 RAG
         # =============================
         if not resposta:
             try:
@@ -135,16 +146,16 @@ def responder(pergunta="", historico_chat=None, usar_token=False, tipo_grafico=N
                     )
             except Exception as e:
                 print("⚠️ Erro no RAG:", e)
-        
+
         # =============================
-        # 🤖 3. IA Fallback
+        # 🤖 IA fallback
         # =============================
         if not resposta:
             try:
                 resposta = gerar_resposta(
                     pergunta,
                     {
-                        "contexto": contexto if 'contexto' in locals() else "",
+                        "contexto": contexto,
                         "transacoes": transacoes,
                         "historico": historico,
                         "produtos": produtos,
@@ -157,21 +168,15 @@ def responder(pergunta="", historico_chat=None, usar_token=False, tipo_grafico=N
                 )
             except Exception as e:
                 print("⚠️ Erro na IA Fallback:", e)
-        
 
         # =============================
-        # 🌙 4. Fallback final
+        # 🌙 Fallback final
         # =============================
         if not resposta:
-            resposta = (
-                "🌙 A Guardiã contempla as estrelas do Reino das Moedas, "
-                "mas não encontrou uma resposta clara. "
-                "Reformule sua pergunta ou siga outro caminho da aventura."
-            )
-
+            resposta = "🌙 A Guardiã não encontrou uma resposta clara."
 
     # =============================
-    # 🎨 Gráfico de narração (se tipo definido manualmente)
+    # 🎨 Gráfico opcional junto com resposta
     # =============================
     if tipo_grafico == "transacoes":
         grafico, narrativa_extra, _, _ = grafico_transacoes_com_historia(transacoes)
@@ -182,19 +187,18 @@ def responder(pergunta="", historico_chat=None, usar_token=False, tipo_grafico=N
         resposta += "\n\n" + narrativa_extra
 
     # =============================
-    # 💬 Atualiza histórico apenas se houver pergunta válida
+    # 💬 Histórico
     # =============================
     historico_chat.append({"role": "user", "content": pergunta})
     historico_chat.append({"role": "assistant", "content": resposta})
 
-      
     # =============================
-    # 🔊 Áudio (com proteção)
+    # 🔊 Áudio
     # =============================
-    
     try:
         audio = gerar_audio(resposta)
     except Exception as e:
         print("⚠️ Erro ao gerar áudio:", e)
         audio = None
-    return resposta, historico_chat, grafico, audio     
+
+    return resposta, historico_chat, grafico, audio 
