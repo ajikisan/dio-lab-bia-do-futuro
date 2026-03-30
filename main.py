@@ -42,45 +42,43 @@ except Exception as e:
     transacoes, historico, produtos, perfil = None, None, None, None
     vector_db = None
 
-
 # =============================
 # 🚀 FUNÇÃO PRINCIPAL (ORQUESTRADOR)
 # =============================
-
-def responder(pergunta, historico_chat, usar_token=False, tipo_grafico=None):
-    if historico_chat is None:
-        historico_chat = []
-
+def responder(pergunta="", historico_chat=None, usar_token=False, tipo_grafico=None):
     # 🛡️ proteção básica
     historico_chat = historico_chat or []
     pergunta = pergunta or ""
     pergunta_norm = normalizar(pergunta)
 
     resposta = None
-    grafico = None
+    grafico = capivara_placeholder()
     audio = None
     narrativa_extra = None
+
     
     # =============================
-    # 💤 Pergunta vazia
+    # 💤 Pergunta vazia ou botões de gráfico
     # =============================
+    if not pergunta.strip() and tipo_grafico:
+        if tipo_grafico == "transacoes":
+            grafico, narrativa_extra, _, _ = grafico_transacoes_com_historia(transacoes)
+        elif tipo_grafico == "atendimentos":
+            grafico, narrativa_extra, _, _ = grafico_atendimento_com_historia(historico)
+        resposta = narrativa_extra or "📜 Aqui está o gráfico do seu reino financeiro!"
+        audio = gerar_audio(resposta)
+        return "", historico_chat, grafico, audio
+
     if not pergunta.strip():
         resposta = (
             "📜 A Guardiã, serena à beira do rio, aguarda sua pergunta "
             "para abrir os pergaminhos mágicos do Reino das Moedas e "
             "revelar os segredos do seu tesouro."
         )
-
-        # Gera áudio e placeholder de gráfico
         historico_chat.append({"role": "assistant", "content": resposta})
         audio = gerar_audio(resposta)
-        # gráfico placeholder
-        grafico = capivara_placeholder()
-                
-        # Retorna imediatamente, sem adicionar ao histórico
         return "", historico_chat, grafico, audio
-       
-        
+
     # =============================
     # 🔒 Segurança
     # =============================
@@ -173,14 +171,12 @@ def responder(pergunta, historico_chat, usar_token=False, tipo_grafico=None):
 
 
     # =============================
-    # 🎨 Escolha do gráfico de narração
+    # 🎨 Gráfico de narração (se tipo definido manualmente)
     # =============================
     if tipo_grafico == "transacoes":
         grafico, narrativa_extra, _, _ = grafico_transacoes_com_historia(transacoes)
     elif tipo_grafico == "atendimentos":
         grafico, narrativa_extra, _, _ = grafico_atendimento_com_historia(historico)
-    else:
-        grafico = capivara_placeholder()
 
     if narrativa_extra:
         resposta += "\n\n" + narrativa_extra
