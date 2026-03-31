@@ -27,30 +27,53 @@ Cada arquivo é usado apenas para simulação lúdica da Capivara Financeira.
 ## Estratégia de Integração
 
 ### Como os dados são carregados?
-> Descreva como seu agente acessa a base de conhecimento.
-- Os arquivos **JSON/CSV mockados** ficam armazenados no Google Drive.  
-- No início da sessão no **Google Colab**, o Drive é montado e os arquivos são lidos com `pandas`.  
-- Exemplo:
-  ```python
-  from google.colab import drive
-  drive.mount('/content/drive')
 
-  import pandas as pd
-  df = pd.read_csv('/content/drive/MyDrive/capivara-financeira/transacoes.csv')
-  ```
+O agente acessa a base de conhecimento local clonando o repositório do projeto e carregando os arquivos de dados com a função `carregar_dados()`. O processo é feito em três etapas:
 
+---
+
+#### 1️⃣ Clonar o repositório e instalar dependências
+
+```bash
+!git clone https://github.com/ajikisan/dio-lab-bia-do-futuro.git
+%cd dio-lab-bia-do-futuro
+!pip install -r requirements.txt
+
+from data.loader import carregar_dados
+# Carrega todas as bases de dados utilizadas pelo agente
+transacoes, historico, produtos, perfil = carregar_dados()
+
+# Verificar quais colunas existem em cada dataset
+print("TRANSACOES COLUNAS:", transacoes.columns.tolist())
+print("HISTORICO COLUNAS:", historico.columns.tolist())
+
+# Mostrar as primeiras linhas
+print("\nTRANSACOES HEAD:")
+print(transacoes.head())
+
+print("\nHISTORICO HEAD:")
+print(historico.head())
+
+```
 
 
 ### Como os dados são usados no prompt?
 > Os dados vão no system prompt? São consultados dinamicamente?
+Os dados **não ficam fixos no system prompt**.  
 
-Os dados não ficam fixos no system prompt.
+O agente **consulta os dados dinamicamente a cada interação**, seguindo este fluxo:
+1. Recebe a pergunta do usuário.
+2. Verifica quais informações do **perfil, transações, histórico e produtos** são relevantes.
+3. Consulta os datasets correspondentes carregados pelo `carregar_dados()`.
+4. Formata essas informações e adiciona ao **prompt do modelo** de forma contextualizada, garantindo:
+   - Respostas atualizadas
+   - Consistência com os dados do usuário
+   - Segurança, evitando inventar informações
+5. Retorna a resposta ao usuário, podendo gerar gráficos ou áudio quando necessário.
 
-Eles são consultados dinamicamente a cada interação:
-
+Dessa forma, o agente mantém a base de conhecimento **sempre dinâmica**, sem precisar fixar dados no system prompt e permitindo respostas personalizadas e confiáveis.
 
 data/transacoes.csv
-
 **Transações Financeiras**
 ```
 data	descricao	categoria	valor	tipo
@@ -168,14 +191,23 @@ Isso garante que a Capivara Financeira só fale com base nos dados disponíveis,
 > Mostre um exemplo de como os dados são formatados para o agente.
 
 
-data/transacoes.csv
+data/historico_atendimento.csv
 
-**Transações Financeiras**
+**Histórico de Atendimentos**
 ```
-data	descricao	categoria	valor	tipo
-2025-10-03	Supermercado	alimentacao	450.00	saida
-2025-10-05	Netflix	lazer	55.90	saida
+data,canal,tema,resumo,resolvido
+2025-09-15,chat,CDB,Cliente perguntou sobre rentabilidade e prazos,sim
+2025-09-22,telefone,Problema no app,Erro ao visualizar extrato foi corrigido,sim
+2025-10-01,chat,Tesouro Selic,Cliente pediu explicação sobre o funcionamento do Tesouro Direto,sim
+2025-10-12,chat,Metas financeiras,Cliente acompanhou o progresso da reserva de emergência,sim
+2025-10-25,email,Atualização cadastral,Cliente atualizou e-mail e telefone,sim...
 ```
 
-"Oi, eu sou a Capivara Financeira! Vi que o Chef da Alimentação gastou 450 moedas no Supermercado e o Artista do Lazer usou 55 moedas em Streaming. Quem será que está dominando seu reino financeiro hoje?"
+🏰 No Reino das Moedas, os guardiões atenderam assim:
+------------------------------------------------------
+🧙 Mago do Chat: 3 interação(ões)
+
+📞 Guardião do Telefone: 1 interação(ões)
+
+🦉 Coruja Mensageira: 1 interação(ões)
 
