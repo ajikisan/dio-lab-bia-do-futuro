@@ -12,13 +12,20 @@ usuários iniciantes ou pessoas que não têm familiaridade com termos bancário
 ### Solução
 > Como o agente resolve esse problema de forma proativa?
 
-Criar um **chatbot lúdico** que utiliza dados **mockados em arquivos CSV/JSON** para simular despesas e apresentar os resultados de forma divertida, narrados pela Capivara Financeira.  
-- O bot lê os dados de arquivos CSV locais (ex.: `data/transacoes.csv`).  
-- Transforma os números em uma **história interativa** com personagens e metáforas.  
-- Dá dicas simples e acessíveis para equilibrar o orçamento.  
+O agente **Capivara Financeira** é um assistente inteligente que:
+- Recebe perguntas em linguagem natural relacionadas às finanças pessoais;
+- Acessa dinamicamente os dados locais de transações, histórico, produtos e perfil;
+- Responde com explicações claras, contextualizadas e facilmente compreensíveis;
+- Gera **gráficos e áudio** quando pertinente;
+- Registra todas as interações para avaliação posterior.
+
+Diferente de soluções estáticas, o agente **não fixa os dados no system prompt** — ele consulta os datasets conforme a necessidade de cada pergunta.
+
 
 **Exemplo de resposta:**  
-“Oi, eu sou a Capivara Financeira! Vi que o Chef da Alimentação gastou 200 moedas, o Motorista do Transporte rodou 150 moedas e o Artista do Lazer usou 100 moedas. Quem será que está dominando seu reino financeiro hoje?”
+📊 Renda: 5000.0 | Gastos: 2488.9 | Comprometimento: 49.8% → Situação: bom
+
+
 
 ### Público-Alvo
 > Quem vai usar esse agente?
@@ -59,36 +66,71 @@ Evita termos técnicos pesados, preferindo linguagem acessível para todos os p�
 
 ### Exemplos de Linguagem
 - **Saudação**
-  “Olá, eu sou a Capivara Financeira! Vamos juntos explorar seus gastos como se fosse uma aventura?”  
+  🏰 Bem-vindo ao Reino das Moedas! Eu sou a Capivara Financeira, guardiã divertida que transforma o dinheiro em aventuras mágicas. 💰 Seu tesouro cresce nos rios das entradas, enfrenta dragões das saídas e segue protegido pelas muralhas rumo às conquistas épicas. Sempre ao seu lado, sem substituir o valor das conversas humanas.
 
 - **Confirmação:**  
-  “Entendi direitinho! Já estou olhando os números para contar a história do seu orçamento.”  
+  📜 A Guardiã, serena à beira do rio, aguarda sua pergunta para abrir os pergaminhos mágicos do Reino das Moedas e revelar os segredos do seu tesouro.
 
 - **Erro/Limitação:**  
-  “Ops, não consegui ler esse arquivo agora… mas se você me mostrar outro CSV, eu continuo a aventura!” 
+  📩 Para suporte humano:
+✨ Saudações, viajante do Reino das Moedas! ✨
+
+   Em sua jornada pelas riquezas e mistérios financeiros, saiba que não caminha só.  
+   
+   Eu, a Guardiã Digital das Moedas, estarei sempre ao seu lado para iluminar o caminho.  
+
+   E, se precisar de algo além das minhas forças digitais, posso abrir o portal até a guardiã humana que deu vida a esta aventura.
+
+   Quando as dúvidas surgirem como sombras, procure pela criadora Mirian Ajiki Molicawa.  
+
+   Assim, seus passos permanecerão firmes diante dos desafios do destino. 🤝  
+   
+   🔗 [LinkedIn](https://www.linkedin.com/in/mirian-ajiki-molicawa/)
+   
+   💻 [GitHub](https://github.com/ajikisan)
 
 ## Arquitetura
 
 ### Diagrama
-
 ```mermaid
+
+
 flowchart TD
-    A[Cliente] -->|Mensagem| B[Interface]
-    B --> C[LLM]
-    C --> D[Base de Conhecimento]
-    D --> C
-    C --> E[Validação]
-    E --> F[Resposta]
+    A[Usuario] --> T1[Pergunta em texto] --> B[Interface Web Gradio Colab]
+    B --> T2[Clique botao Grafico ou Audio] --> B1[Botao Grafico Audio]
+    B --> T3[Envio da pergunta] --> C[Agente Backend]
+    C --> D{Regras ou RAG IA}
+    D --> E[Execucao de Regras]
+    D --> F[IA LLM]
+    F --> G[Base de Conhecimento CSV dados]
+    G --> F
+    E --> T4[Resultado regras] --> C
+    F --> T5[Resultado IA] --> C
+    C --> T6[Resposta texto grafico audio] --> B
+    B --> T7[Exibe resultado] --> A
+    B1 --> T8[Aciona grafico audio] --> C
+
+
+
+
+
+
+
 ```
+
 
 ### Componentes
 
-| Componente | Descrição |
-|------------|-----------|
-| Interface | **Streamlit** rodando no Google Colab, acessível via navegador |
-| LLM | Modelo de linguagem (ex: GPT-4 via API ou modelos open-source da Hugging Face|
-| Base de Conhecimento | Arquivos JSON/CSV mockados com transações fictícias |
-| Validação | Checagem de alucinações e prevenção de alucinações |
+| Componente                   | Função                                                                |
+| ---------------------------- | --------------------------------------------------------------------- |
+| Interface Web (Gradio/Colab) | Recebe perguntas e exibe respostas, gráficos e áudio                  |
+| Botões de Gráfico / Áudio    | Disparam consultas específicas ao backend                             |
+| Agente / Backend             | Coordena o fluxo de decisão: Regras ou RAG/IA                         |
+| Decisão Regras / RAG-IA      | Determina a forma de gerar a resposta                                 |
+| Execução de Regras Locais    | Respostas padrões rápidas ou cálculos simples                         |
+| IA / LLM                     | Gera respostas contextualizadas e interage com a base de conhecimento |
+| Base de Conhecimento         | Dados carregados localmente (transações, histórico, produtos, perfil) |
+| Usuário                      | Interage com perguntas e botões                                       |
 
 ---
 
@@ -105,9 +147,9 @@ flowchart TD
 
 ### Limitações Declaradas
 > O que o agente NÃO faz?
-- Não acessa dados bancários reais
-- Não substitui consultoria financeira profissional
-- Não garante precisão em cálculos complexos (trabalha apenas com dados mockados).
-- Não recomenda investimentos ou produtos financeiros específicos.
-- Não interpreta informações fora dos arquivos fornecidos (JSON/CSV)
-- Não responde sobre temas fora do escopo de finanças pessoais simuladas
+- [X] Não acessa dados bancários reais
+- [X] Não substitui consultoria financeira profissional
+- [X] Não garante precisão em cálculos complexos (trabalha apenas com dados mockados).
+- [X] Não recomenda investimentos ou produtos financeiros específicos.
+- [X] Não interpreta informações fora dos arquivos fornecidos (JSON/CSV)
+- [X] Não responde sobre temas fora do escopo de finanças pessoais simuladas
